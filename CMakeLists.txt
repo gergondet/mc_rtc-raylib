@@ -32,6 +32,8 @@ set(main_SRC
   utils.h
   utils.cpp
   r3d.c
+  Camera.h
+  Camera.cpp
 )
 
 add_executable(main ${main_SRC})

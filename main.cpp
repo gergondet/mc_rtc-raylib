@@ -4,6 +4,7 @@
 #include <cmath>
 #include <iostream>
 
+#include "Camera.h"
 #include "InteractiveMarker.h"
 #include "RobotModel.h"
 #include "utils.h"
@@ -23,7 +24,7 @@ int main(void)
   auto & robot = robots->robot();
 
   // Define the camera to look into our 3d world
-  Camera camera = { 0 };
+  OrbitCamera camera;
   camera.position = (Vector3){ 3.0f, 3.0f, 3.0f }; // Camera position
   camera.target = (Vector3){ 0.0f, 0.0f, 0.0f };    // Camera looking at point
   camera.up = (Vector3){ 0.0f, 0.0f, 1.0f };      // Camera up vector (rotation towards target)
@@ -45,9 +46,7 @@ int main(void)
   // Main game loop
   while (!WindowShouldClose())    // Detect window close button or ESC key
   {
-    // Update
-    //----------------------------------------------------------------------------------
-    UpdateCamera(&camera);      // Update camera
+    camera.update();
 
     {
       ray = GetMouseRay(GetMousePosition(), camera);
@@ -65,7 +64,7 @@ int main(void)
 
         DrawGridXY(10, 1.0f);
 
-        //DrawGizmo({0, 0, 0});
+        DrawGizmo({0, 0, 0});
 
         model.draw(robot, camera, ray);
 
