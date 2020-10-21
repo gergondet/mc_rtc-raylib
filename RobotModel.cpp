@@ -138,6 +138,11 @@ bfs::path convertURI(const std::string & uri)
   }
 }
 
+BodyDrawer::ModelData::~ModelData()
+{
+  UnloadModel(model);
+}
+
 BodyDrawer::BodyDrawer(const std::vector<rbd::parsers::Visual> & v, Shader shader)
 {
   auto fromMesh = [&](const rbd::parsers::Visual & v) {
@@ -145,10 +150,10 @@ BodyDrawer::BodyDrawer(const std::vector<rbd::parsers::Visual> & v, Shader shade
     auto path = convertURI(mesh.filename);
     auto cwd = bfs::current_path();
     bfs::current_path(path.parent_path());
-    models_.push_back({LoadModelAdvanced(path.string().c_str()), path.leaf().string(), mesh.scale, v.origin});
-    for(int i = 0; i < models_.back().model.materialCount; ++i)
+    models_.emplace_back(new ModelData{LoadModelAdvanced(path.string().c_str()), path.leaf().string(), static_cast<float>(mesh.scale), v.origin});
+    for(int i = 0; i < models_.back()->model.materialCount; ++i)
     {
-      models_.back().model.materials[i].shader = shader;
+      models_.back()->model.materials[i].shader = shader;
     }
     bfs::current_path(cwd);
   };
@@ -169,7 +174,7 @@ void BodyDrawer::update(const sva::PTransformd & pose)
 {
   for(auto & m : models_)
   {
-    m.model.transform = convert(m.X_b_model * pose);
+    m->model.transform = convert(m->X_b_model * pose);
   }
 }
 
@@ -177,7 +182,7 @@ void BodyDrawer::draw()
 {
   for(const auto & m : models_)
   {
-    DrawModel(m.model, {0, 0, 0}, m.scale, WHITE);
+    DrawModel(m->model, {0, 0, 0}, m->scale, WHITE);
   }
 }
 
@@ -217,4 +222,9 @@ void RobotModel::draw(Camera camera)
   {
     b.draw();
   }
+}
+
+RobotModel::~RobotModel()
+{
+  UnloadShader(shader_);
 }

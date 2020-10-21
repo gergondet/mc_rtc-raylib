@@ -27,7 +27,7 @@ int main(void)
   camera.fovy = 45.0f;                // Camera field-of-view Y
   camera.type = CAMERA_PERSPECTIVE;           // Camera mode type
 
-  Client client("ipc:///tmp/mc_rtc_pub.ipc", "ipc:///tmp/mc_rtc_rep.ipc");
+  Client client("ipc:///tmp/mc_rtc_pub.ipc", "ipc:///tmp/mc_rtc_rep.ipc", 1);
   InteractiveMarker marker({Eigen::Matrix3d::Identity(), Eigen::Vector3d(0, 0, 0)});
 
   SetCameraMode(camera, CAMERA_FREE); // Set a free camera mode
@@ -70,6 +70,8 @@ int main(void)
     EndDrawing();
     //----------------------------------------------------------------------------------
   }
+
+  client.clear();
 
   // De-Initialization
   //--------------------------------------------------------------------------------------

@@ -18,13 +18,16 @@ private:
     std::string name;
     float scale;
     sva::PTransformd X_b_model;
+    ~ModelData();
   };
-  std::vector<ModelData> models_;
+  std::vector<std::unique_ptr<ModelData>> models_;
 };
 
 struct RobotModel
 {
   RobotModel(const mc_rbdyn::Robot & robot, bool useCollisionModel = false);
+
+  ~RobotModel();
 
   void update(const mc_rbdyn::Robot & robot);
 

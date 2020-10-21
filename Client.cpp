@@ -27,6 +27,12 @@ void Client::stopped()
   root_.stopped();
 }
 
+void Client::clear()
+{
+  root_.categories.clear();
+  root_.widgets.clear();
+}
+
 /** We rely on widgets to create categories */
 void Client::category(const std::vector<std::string> &, const std::string &) {}
 

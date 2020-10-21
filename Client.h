@@ -24,6 +24,9 @@ struct Client : public mc_control::ControllerClient
   /** Draw 3D elements */
   void draw3D(Camera camera);
 
+  /** Remove all elements */
+  void clear();
+
 private:
   std::vector<char> buffer_ = std::vector<char>(65535);
   std::chrono::system_clock::time_point t_last_ = std::chrono::system_clock::now();
@@ -45,6 +48,9 @@ private:
   struct Widget
   {
     inline Widget(const std::string & name) : name(name) {}
+
+    virtual ~Widget() = default;
+
     std::string name;
     bool seen = true;
 
