@@ -9,6 +9,8 @@
 
 #include <SpaceVecAlg/Conversions.h>
 
+#include <mc_rtc/config.h>
+
 #include <boost/filesystem.hpp>
 namespace bfs = boost::filesystem;
 
@@ -114,10 +116,23 @@ bfs::path convertURI(const std::string & uri)
     size_t split = uri.find('/', package.size());
     std::string pkg = uri.substr(package.size(), split - package.size());
     auto leaf = bfs::path(uri.substr(split + 1));
+    bfs::path MC_ENV_DESCRIPTION_PATH(mc_rtc::MC_ENV_DESCRIPTION_PATH);
     // FIXME Use ROS if available, prompt the user otherwise
     if(pkg == "jvrc_description")
     {
-      pkg = "/home/gergondet/devel/src/catkin_data_ws/src/mc_rtc_data/jvrc_description";
+      pkg = (MC_ENV_DESCRIPTION_PATH / ".." / "jvrc_description").string();
+    }
+    else if(pkg == "mc_env_description")
+    {
+      pkg = MC_ENV_DESCRIPTION_PATH.string();
+    }
+    else if(pkg == "mc_int_obj_description")
+    {
+      pkg = (MC_ENV_DESCRIPTION_PATH / ".." / "mc_int_obj_description").string();
+    }
+    else
+    {
+      mc_rtc::log::critical("Cannot resolve package: {}", pkg);
     }
     return pkg / leaf;
   }
