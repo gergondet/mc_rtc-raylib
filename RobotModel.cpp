@@ -188,7 +188,7 @@ void BodyDrawer::draw()
 
 RobotModel::RobotModel(const mc_rbdyn::Robot & robot, bool useCollisionModel)
 {
-  const auto & visual = useCollisionModel ? robot.module()._visual : robot.module()._collision;
+  const auto & visual = useCollisionModel ? robot.module()._collision : robot.module()._visual;
   shader_ = LoadShaderCode(GOOSH_VERTEX_SHADER.c_str(), GOOSH_FRAGMENT_SHADER.c_str());
   shader_.locs[LOC_MATRIX_MODEL] = GetShaderLocation(shader_, "matModel");
   shader_.locs[LOC_VECTOR_VIEW] = GetShaderLocation(shader_, "viewPos");
