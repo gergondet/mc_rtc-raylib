@@ -36,6 +36,7 @@ set(main_SRC
   Camera.cpp
   Client.h
   Client.cpp
+  SceneState.h
 )
 
 add_executable(main ${main_SRC})

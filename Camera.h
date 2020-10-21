@@ -1,10 +1,10 @@
 #pragma once
 
-#include "raylib.h"
+#include "SceneState.h"
 
 struct OrbitCamera : public Camera
 {
-  void update();
+  void update(SceneState & state);
 private:
   bool rotate = false;
   bool pan = false;

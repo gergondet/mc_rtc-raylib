@@ -4,15 +4,35 @@
 
 #include <stdio.h>
 
-void OrbitCamera::update()
+void OrbitCamera::update(SceneState & state)
 {
+  if(GetMouseWheelMove() != 0)
+  {
+    Vector3 direction = Vector3Normalize(Vector3Subtract(position, target));
+    int move = GetMouseWheelMove();
+    float distance = Vector3Length(Vector3Subtract(target, position));
+    if(move > 0)
+    {
+      position = Vector3Add(position, Vector3Scale(direction, -0.1 * distance));
+    }
+    else
+    {
+      position = Vector3Add(position, Vector3Scale(direction, 0.1 * distance));
+    }
+  }
+  if(state.mouseHandler && state.mouseHandler != this)
+  {
+    return;
+  }
   if(IsMouseButtonReleased(0))
   {
     rotate = false;
+    state.mouseHandler = nullptr;
   }
   if(IsMouseButtonReleased(2))
   {
     pan = false;
+    state.mouseHandler = nullptr;
   }
   if(pan || rotate)
   {
@@ -45,28 +65,16 @@ void OrbitCamera::update()
       start = GetMousePosition();
     }
   }
-  else if(GetMouseWheelMove() != 0)
-  {
-    Vector3 direction = Vector3Normalize(Vector3Subtract(position, target));
-    int move = GetMouseWheelMove();
-    float distance = Vector3Length(Vector3Subtract(target, position));
-    if(move > 0)
-    {
-      position = Vector3Add(position, Vector3Scale(direction, -0.1 * distance));
-    }
-    else
-    {
-      position = Vector3Add(position, Vector3Scale(direction, 0.1 * distance));
-    }
-  }
   if(IsMouseButtonPressed(0))
   {
     rotate = true;
     start = GetMousePosition();
+    state.mouseHandler = this;
   }
   if(IsMouseButtonPressed(2))
   {
     pan = true;
     start = GetMousePosition();
+    state.mouseHandler = this;
   }
 }

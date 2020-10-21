@@ -2,6 +2,11 @@
 
 #include <mc_rbdyn/RobotLoader.h>
 
+void Client::update(SceneState &)
+{
+  run(buffer_, t_last_);
+}
+
 void Client::draw2D()
 {
   root_.draw2D();

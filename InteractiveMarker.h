@@ -4,6 +4,7 @@
 
 #include "raylib.h"
 #include "raymath.h"
+#include "SceneState.h"
 
 struct InteractiveMarker
 {
@@ -11,7 +12,7 @@ struct InteractiveMarker
 
   void pose(const sva::PTransformd & pose);
 
-  void update(Camera camera, Ray ray);
+  void update(Camera camera, Ray ray, SceneState & state);
 
   void draw();
 private:

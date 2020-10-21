@@ -4,8 +4,8 @@
 
 #include <mc_rbdyn/Robots.h>
 
-#include "raylib.h"
 #include "RobotModel.h"
+#include "SceneState.h"
 
 struct Client : public mc_control::ControllerClient
 {
@@ -15,6 +15,9 @@ struct Client : public mc_control::ControllerClient
   /** Same constructors as the base class */
   using mc_control::ControllerClient::ControllerClient;
 
+  /** Update the client data from the latest server message */
+  void update(SceneState & state);
+
   /** Draw 2D elements */
   void draw2D();
 
@@ -22,6 +25,9 @@ struct Client : public mc_control::ControllerClient
   void draw3D(Camera camera);
 
 private:
+  std::vector<char> buffer_ = std::vector<char>(65535);
+  std::chrono::system_clock::time_point t_last_ = std::chrono::system_clock::now();
+
   /** No message for unsupported types */
   void default_impl(const std::string &, const ElementId &) final {}
 

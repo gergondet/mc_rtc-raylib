@@ -28,29 +28,23 @@ int main(void)
   camera.type = CAMERA_PERSPECTIVE;           // Camera mode type
 
   Client client("ipc:///tmp/mc_rtc_pub.ipc", "ipc:///tmp/mc_rtc_rep.ipc");
-  std::vector<char> buffer(65535);
   InteractiveMarker marker({Eigen::Matrix3d::Identity(), Eigen::Vector3d(0, 0, 0)});
-
-  Ray ray = { 0 };          // Picking line ray
-
-  bool collision = false;
 
   SetCameraMode(camera, CAMERA_FREE); // Set a free camera mode
 
   SetTargetFPS(60);           // Set our game to run at 60 frames-per-second
-  //--------------------------------------------------------------------------------------
+
+  SceneState state;
 
   // Main game loop
-  auto t_start = std::chrono::system_clock::now();
   while (!WindowShouldClose())    // Detect window close button or ESC key
   {
-    camera.update();
-
-    client.run(buffer, t_start);
+    client.update(state);
     {
-      ray = GetMouseRay(GetMousePosition(), camera);
-      marker.update(camera, ray);
+      auto ray = GetMouseRay(GetMousePosition(), camera);
+      marker.update(camera, ray, state);
     }
+    camera.update(state);
     //----------------------------------------------------------------------------------
 
     // Draw
