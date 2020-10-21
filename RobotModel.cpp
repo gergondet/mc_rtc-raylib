@@ -123,53 +123,48 @@ bfs::path convertURI(const std::string & uri)
   }
 }
 
-struct BodyDrawer
+BodyDrawer::BodyDrawer(const std::vector<rbd::parsers::Visual> & v, Shader shader)
 {
-  BodyDrawer(const std::vector<rbd::parsers::Visual> & v, Shader shader)
-  {
-    auto fromMesh = [&](const rbd::parsers::Visual & v) {
-      const auto & mesh = boost::get<rbd::parsers::Geometry::Mesh>(v.geometry.data);
-      auto path = convertURI(mesh.filename);
-      auto cwd = bfs::current_path();
-      bfs::current_path(path.parent_path());
-      models_.push_back({LoadModelAdvanced(path.string().c_str()), path.leaf().string(), mesh.scale, v.origin});
-      for(int i = 0; i < models_.back().model.materialCount; ++i)
-      {
-        models_.back().model.materials[i].shader = shader;
-      }
-      bfs::current_path(cwd);
-    };
-    for(const auto & visual : v)
+  auto fromMesh = [&](const rbd::parsers::Visual & v) {
+    const auto & mesh = boost::get<rbd::parsers::Geometry::Mesh>(v.geometry.data);
+    auto path = convertURI(mesh.filename);
+    auto cwd = bfs::current_path();
+    bfs::current_path(path.parent_path());
+    models_.push_back({LoadModelAdvanced(path.string().c_str()), path.leaf().string(), mesh.scale, v.origin});
+    for(int i = 0; i < models_.back().model.materialCount; ++i)
     {
-      switch(visual.geometry.type)
-      {
-        case rbd::parsers::Geometry::MESH:
-          fromMesh(visual);
-          break;
-        default:
-          break;
-      }
+      models_.back().model.materials[i].shader = shader;
     }
-  }
-
-  void draw(const sva::PTransformd & pose, Ray) const
-  {
-    for(const auto & m : models_)
-    {
-      m.model.transform = convert(m.X_b_model * pose);
-      DrawModel(m.model, {0, 0, 0}, m.scale, WHITE);
-    }
-  }
-private:
-  struct ModelData
-  {
-    mutable Model model;
-    std::string name;
-    float scale;
-    sva::PTransformd X_b_model;
+    bfs::current_path(cwd);
   };
-  std::vector<ModelData> models_;
-};
+  for(const auto & visual : v)
+  {
+    switch(visual.geometry.type)
+    {
+      case rbd::parsers::Geometry::MESH:
+        fromMesh(visual);
+        break;
+      default:
+        break;
+    }
+  }
+}
+
+void BodyDrawer::update(const sva::PTransformd & pose)
+{
+  for(auto & m : models_)
+  {
+    m.model.transform = convert(m.X_b_model * pose);
+  }
+}
+
+void BodyDrawer::draw()
+{
+  for(const auto & m : models_)
+  {
+    DrawModel(m.model, {0, 0, 0}, m.scale, WHITE);
+  }
+}
 
 RobotModel::RobotModel(const mc_rbdyn::Robot & robot, bool useCollisionModel)
 {
@@ -181,20 +176,30 @@ RobotModel::RobotModel(const mc_rbdyn::Robot & robot, bool useCollisionModel)
   {
     if(!visual.count(b.name()))
     {
-      draw_.push_back([](const sva::PTransformd &, Ray){});
-      continue;
+      bodies_.push_back({{}, shader_});
     }
-    draw_.push_back([bd=BodyDrawer(visual.at(b.name()), shader_)](const sva::PTransformd & p, Ray r) { bd.draw(p, r); });
+    else
+    {
+      bodies_.emplace_back(visual.at(b.name()), shader_);
+    }
   }
 }
 
-void RobotModel::draw(const mc_rbdyn::Robot & robot, Camera camera, Ray ray)
+void RobotModel::update(const mc_rbdyn::Robot & robot)
 {
-  float cameraPos[3] = { camera.position.x, camera.position.y, camera.position.z };
-  SetShaderValue(shader_, shader_.locs[LOC_VECTOR_VIEW], cameraPos, UNIFORM_VEC3);
   const auto & poses = robot.bodyPosW();
   for(size_t i = 0; i < poses.size(); ++i)
   {
-    draw_[i](poses[i], ray);
+    bodies_[i].update(poses[i]);
+  }
+}
+
+void RobotModel::draw(Camera camera)
+{
+  float cameraPos[3] = { camera.position.x, camera.position.y, camera.position.z };
+  SetShaderValue(shader_, shader_.locs[LOC_VECTOR_VIEW], cameraPos, UNIFORM_VEC3);
+  for(auto & b : bodies_)
+  {
+    b.draw();
   }
 }

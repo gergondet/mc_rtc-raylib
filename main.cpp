@@ -5,8 +5,8 @@
 #include <iostream>
 
 #include "Camera.h"
+#include "Client.h"
 #include "InteractiveMarker.h"
-#include "RobotModel.h"
 #include "utils.h"
 
 int main(void)
@@ -19,10 +19,6 @@ int main(void)
   SetConfigFlags(FLAG_MSAA_4X_HINT);  // Enable Multi Sampling Anti Aliasing 4x (if available)
   InitWindow(screenWidth, screenHeight, "mc_rtc - raylib based 3D GUI");
 
-  auto rm = mc_rbdyn::RobotLoader::get_robot_module("JVRC1");
-  auto robots = mc_rbdyn::loadRobot(*rm);
-  auto & robot = robots->robot();
-
   // Define the camera to look into our 3d world
   OrbitCamera camera;
   camera.position = (Vector3){ 3.0f, 3.0f, 3.0f }; // Camera position
@@ -31,7 +27,8 @@ int main(void)
   camera.fovy = 45.0f;                // Camera field-of-view Y
   camera.type = CAMERA_PERSPECTIVE;           // Camera mode type
 
-  auto model = RobotModel(robot);
+  Client client("ipc:///tmp/mc_rtc_pub.ipc", "ipc:///tmp/mc_rtc_rep.ipc");
+  std::vector<char> buffer(65535);
   InteractiveMarker marker({Eigen::Matrix3d::Identity(), Eigen::Vector3d(0, 0, 0)});
 
   Ray ray = { 0 };          // Picking line ray
@@ -44,10 +41,12 @@ int main(void)
   //--------------------------------------------------------------------------------------
 
   // Main game loop
+  auto t_start = std::chrono::system_clock::now();
   while (!WindowShouldClose())    // Detect window close button or ESC key
   {
     camera.update();
 
+    client.run(buffer, t_start);
     {
       ray = GetMouseRay(GetMousePosition(), camera);
       marker.update(camera, ray);
@@ -66,9 +65,9 @@ int main(void)
 
         DrawGizmo({0, 0, 0});
 
-        model.draw(robot, camera, ray);
-
         marker.draw();
+
+        client.draw3D(camera);
 
       EndMode3D();
 

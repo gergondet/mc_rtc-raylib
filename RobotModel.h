@@ -4,15 +4,32 @@
 
 #include "raylib.h"
 
+struct BodyDrawer
+{
+  BodyDrawer(const std::vector<rbd::parsers::Visual> & v, Shader shader);
+
+  void update(const sva::PTransformd & pos);
+
+  void draw();
+private:
+  struct ModelData
+  {
+    Model model;
+    std::string name;
+    float scale;
+    sva::PTransformd X_b_model;
+  };
+  std::vector<ModelData> models_;
+};
+
 struct RobotModel
 {
-
   RobotModel(const mc_rbdyn::Robot & robot, bool useCollisionModel = false);
 
-  void draw(const mc_rbdyn::Robot & robot, Camera camera, Ray ray);
+  void update(const mc_rbdyn::Robot & robot);
 
+  void draw(Camera camera);
 private:
-  using draw_call_t = std::function<void(const sva::PTransformd&, Ray)>;
-  std::vector<draw_call_t> draw_;
+  std::vector<BodyDrawer> bodies_;
   Shader shader_;
 };
