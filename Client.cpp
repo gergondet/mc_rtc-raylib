@@ -11,7 +11,9 @@ void Client::update(SceneState & state)
 
 void Client::draw2D()
 {
+  ImGui::Begin("mc_rtc");
   root_.draw2D();
+  ImGui::End();
 }
 
 void Client::draw3D(Camera camera)

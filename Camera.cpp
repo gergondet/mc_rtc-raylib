@@ -6,6 +6,10 @@
 
 void OrbitCamera::update(SceneState & state)
 {
+  if(state.mouseHandler && state.mouseHandler != this)
+  {
+    return;
+  }
   if(GetMouseWheelMove() != 0)
   {
     Vector3 direction = Vector3Normalize(Vector3Subtract(position, target));
@@ -19,10 +23,6 @@ void OrbitCamera::update(SceneState & state)
     {
       position = Vector3Add(position, Vector3Scale(direction, 0.1 * distance));
     }
-  }
-  if(state.mouseHandler && state.mouseHandler != this)
-  {
-    return;
   }
   if(IsMouseButtonReleased(0))
   {

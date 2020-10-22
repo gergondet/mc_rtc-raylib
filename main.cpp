@@ -86,6 +86,7 @@ int main(void)
 
       DrawFPS(10, 10);
 
+      client.draw2D();
       ImGui::ShowDemoWindow();
       ImGui::Render();
       ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

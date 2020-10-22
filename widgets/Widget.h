@@ -32,3 +32,4 @@ struct Widget
 using WidgetPtr = std::unique_ptr<Widget>;
 
 #include "../Client.h"
+#include "imgui.h"

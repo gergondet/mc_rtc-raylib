@@ -18,9 +18,25 @@ void Category::draw2D()
   {
     w->draw2D();
   }
-  for(auto & cat : categories)
+  if(widgets.size())
   {
-    cat->draw2D();
+    ImGui::Separator();
+  }
+  if(categories.size())
+  {
+    ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_Reorderable;
+    if(ImGui::BeginTabBar(name.c_str(), tab_bar_flags))
+    {
+      for(auto & cat : categories)
+      {
+        if(ImGui::BeginTabItem(cat->name.c_str()))
+        {
+          cat->draw2D();
+          ImGui::EndTabItem();
+        }
+      }
+      ImGui::EndTabBar();
+    }
   }
 }
 
