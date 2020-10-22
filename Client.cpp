@@ -1,5 +1,6 @@
 #include "Client.h"
 
+#include "widgets/ArrayLabel.h"
 #include "widgets/Label.h"
 #include "widgets/Point3D.h"
 #include "widgets/Robot.h"
@@ -44,6 +45,11 @@ void Client::category(const std::vector<std::string> &, const std::string &) {}
 void Client::label(const ElementId & id, const std::string & txt)
 {
   widget<Label>(id).data(txt);
+}
+
+void Client::array_label(const ElementId & id, const std::vector<std::string> & labels, const Eigen::VectorXd & data)
+{
+  widget<ArrayLabel>(id).data(labels, data);
 }
 
 void Client::point3d(const ElementId & id,

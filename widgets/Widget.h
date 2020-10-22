@@ -9,6 +9,12 @@
 
 #include "../SceneState.h"
 
+#ifdef SPDLOG_FMT_EXTERNAL
+#include <fmt/ranges.h>
+#else
+#include <spdlog/fmt/bundled/ranges.h>
+#endif
+
 struct Client;
 
 using ElementId = mc_control::ElementId;
