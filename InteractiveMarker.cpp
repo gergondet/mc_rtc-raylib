@@ -12,17 +12,38 @@ InteractiveMarker::MarkerOrientationControl::MarkerOrientationControl(Model toru
 {
 }
 
-InteractiveMarker::InteractiveMarker(const sva::PTransformd & pose) : pose_(pose)
+InteractiveMarker::InteractiveMarker(const sva::PTransformd & pose, ControlAxis mask) : pose_(pose)
 {
-  posControls_[0] = {RED, Eigen::Vector3d::UnitX()};
-  posControls_[1] = {RED, -Eigen::Vector3d::UnitX()};
-  posControls_[2] = {GREEN, Eigen::Vector3d::UnitY()};
-  posControls_[3] = {GREEN, -Eigen::Vector3d::UnitY()};
-  posControls_[4] = {BLUE, Eigen::Vector3d::UnitZ()};
-  posControls_[5] = {BLUE, -Eigen::Vector3d::UnitZ()};
-  oriControls_[0] = {LoadModelFromMesh(GenMeshTorus(0.1f, 0.3f, 8, 32)), RED, {1, 0, 0}, MatrixRotateY(M_PI / 2)};
-  oriControls_[1] = {LoadModelFromMesh(GenMeshTorus(0.1f, 0.3f, 8, 32)), GREEN, {0, 1, 0}, MatrixRotateX(M_PI / 2)};
-  oriControls_[2] = {LoadModelFromMesh(GenMeshTorus(0.1f, 0.3f, 8, 32)), BLUE, {0, 0, 1}};
+  auto check = [&](ControlAxis value) { return (mask & value) == value; };
+  if(check(ControlAxis::TX))
+  {
+    posControls_.emplace_back(RED, Eigen::Vector3d::UnitX());
+    posControls_.emplace_back(RED, -Eigen::Vector3d::UnitX());
+  }
+  if(check(ControlAxis::TY))
+  {
+    posControls_.emplace_back(GREEN, Eigen::Vector3d::UnitY());
+    posControls_.emplace_back(GREEN, -Eigen::Vector3d::UnitY());
+  }
+  if(check(ControlAxis::TZ))
+  {
+    posControls_.emplace_back(BLUE, Eigen::Vector3d::UnitZ());
+    posControls_.emplace_back(BLUE, -Eigen::Vector3d::UnitZ());
+  }
+  if(check(ControlAxis::RX))
+  {
+    oriControls_.emplace_back(LoadModelFromMesh(GenMeshTorus(0.1f, 0.3f, 8, 32)), RED, Vector3{1, 0, 0},
+                              MatrixRotateY(M_PI / 2));
+  }
+  if(check(ControlAxis::RY))
+  {
+    oriControls_.emplace_back(LoadModelFromMesh(GenMeshTorus(0.1f, 0.3f, 8, 32)), GREEN, Vector3{0, 1, 0},
+                              MatrixRotateX(M_PI / 2));
+  }
+  if(check(ControlAxis::RZ))
+  {
+    oriControls_.emplace_back(LoadModelFromMesh(GenMeshTorus(0.1f, 0.3f, 8, 32)), BLUE, Vector3{0, 0, 1});
+  }
   this->pose(pose_);
 }
 
@@ -121,7 +142,8 @@ void InteractiveMarker::update(Camera camera, Ray ray, SceneState & state)
       }
       else
       {
-        Vector3 point = Vector3Normalize(Vector3Subtract(intersection(ray, c.pZ, translation(pose_)), translation(pose_)));
+        Vector3 point =
+            Vector3Normalize(Vector3Subtract(intersection(ray, c.pZ, translation(pose_)), translation(pose_)));
         float x = Vector3DotProduct(point, c.pX);
         float y = Vector3DotProduct(point, c.pY);
         float theta = atan2(y, x);
