@@ -4,7 +4,7 @@
 
 struct Point3D : public Widget
 {
-  Point3D(const std::string & name, const ElementId & requestId);
+  Point3D(const ElementId & id, const ElementId & requestId);
 
   ~Point3D() override = default;
 

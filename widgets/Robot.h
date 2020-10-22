@@ -4,7 +4,7 @@
 
 struct Robot : public Widget
 {
-  Robot(const std::string & name, const std::vector<std::string> & parameters);
+  Robot(const ElementId & id, const std::vector<std::string> & parameters);
 
   ~Robot() override = default;
 

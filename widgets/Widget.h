@@ -1,5 +1,7 @@
 #pragma once
 
+#include <mc_control/ControllerClient.h>
+
 #include <mc_rbdyn/Robot.h>
 
 #include <memory>
@@ -9,14 +11,16 @@
 
 struct Client;
 
+using ElementId = mc_control::ElementId;
+
 /** A widget in the GUI */
 struct Widget
 {
-  inline Widget(const std::string & name) : name(name) {}
+  inline Widget(const ElementId & id) : id(id) {}
 
   virtual ~Widget() = default;
 
-  std::string name;
+  ElementId id;
   bool seen = true;
 
   /** Update based on user interaction */

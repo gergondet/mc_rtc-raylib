@@ -66,10 +66,10 @@ private:
   {
     auto & category = getCategory(id.category);
     auto it =
-        std::find_if(category.widgets.begin(), category.widgets.end(), [&](auto & w) { return w->name == id.name; });
+        std::find_if(category.widgets.begin(), category.widgets.end(), [&](auto & w) { return w->id.name == id.name; });
     if(it == category.widgets.end())
     {
-      auto & w = category.widgets.emplace_back(std::make_unique<T>(id.name, std::forward<Args>(args)...));
+      auto & w = category.widgets.emplace_back(std::make_unique<T>(id, std::forward<Args>(args)...));
       w->seen = true;
       return *dynamic_cast<T *>(w.get());
     }

@@ -4,18 +4,18 @@
 
 struct Label : public Widget
 {
-  inline Label(const std::string & name) : Widget(name) {}
+  inline Label(const ElementId & id) : Widget(id) {}
 
   ~Label() override = default;
 
-  void data(const std::string & txt)
+  inline void data(const std::string & txt)
   {
     txt_ = txt;
   }
 
-  void draw2D() override
+  inline void draw2D() override
   {
-    ImGui::LabelText(txt_.c_str(), "%s", name.c_str());
+    ImGui::LabelText(txt_.c_str(), "%s", id.name.c_str());
   }
 private:
   std::string txt_;

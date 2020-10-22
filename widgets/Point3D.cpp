@@ -1,6 +1,6 @@
 #include "Point3D.h"
 
-Point3D::Point3D(const std::string & name, const ElementId & requestId) : Widget(name), requestId_(requestId) {}
+Point3D::Point3D(const ElementId & id, const ElementId & requestId) : Widget(id), requestId_(requestId) {}
 
 void Point3D::data(bool ro, const Eigen::Vector3d & pos, const mc_rtc::gui::PointConfig & config)
 {

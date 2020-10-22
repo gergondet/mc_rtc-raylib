@@ -2,7 +2,7 @@
 
 #include <mc_rbdyn/RobotLoader.h>
 
-Robot::Robot(const std::string & name, const std::vector<std::string> & p) : Widget(name)
+Robot::Robot(const ElementId & id, const std::vector<std::string> & p) : Widget(id)
 {
   mc_rbdyn::RobotModulePtr rm{nullptr};
   if(p.size() == 1)
@@ -23,7 +23,7 @@ Robot::Robot(const std::string & name, const std::vector<std::string> & p) : Wid
   }
   if(!rm)
   {
-    mc_rtc::log::error("RobotWidget {} cannot be displayed as the RobotModule cannot be loaded", name);
+    mc_rtc::log::error("RobotWidget {} cannot be displayed as the RobotModule cannot be loaded", id.name);
     return;
   }
   robots_ = mc_rbdyn::loadRobot(*rm);
@@ -53,8 +53,8 @@ void Robot::data(const std::vector<std::vector<double>> & q)
 
 void Robot::draw2D()
 {
-  ImGui::Checkbox(fmt::format("Display {}", name).c_str(), &display_);
-  ImGui::Checkbox(fmt::format("Display {} collision model", name).c_str(), &displayCollision_);
+  ImGui::Checkbox(fmt::format("Display {}", id.name).c_str(), &display_);
+  ImGui::Checkbox(fmt::format("Display {} collision model", id.name).c_str(), &displayCollision_);
 }
 
 void Robot::draw3D(Camera camera)
