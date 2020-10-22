@@ -49,6 +49,9 @@ set(main_SRC
   Client.h
   Client.cpp
   SceneState.h
+  widgets/Category.h
+  widgets/Category.cpp
+  widgets/Widget.h
   widgets/Robot.cpp
   widgets/Point3D.cpp
   ${imgui_SRC}

@@ -8,6 +8,8 @@
 #include "RobotModel.h"
 #include "SceneState.h"
 
+#include "widgets/Category.h"
+
 struct Client : public mc_control::ControllerClient
 {
   /* Typedef for brievity */
@@ -51,44 +53,6 @@ private:
 
   void stopped() override;
 
-  /** A widget in the GUI */
-  struct Widget
-  {
-    inline Widget(const std::string & name) : name(name) {}
-
-    virtual ~Widget() = default;
-
-    std::string name;
-    bool seen = true;
-
-    /** Update based on user interaction */
-    virtual void update(Client &, SceneState &) {}
-
-    /** Draw the 2D elements of the widget */
-    virtual void draw2D() {}
-
-    /** Draw the 3D elements of the widget */
-    virtual void draw3D(Camera) {}
-  };
-  using WidgetPtr = std::unique_ptr<Widget>;
-
-  /** Category, the root has depth -1 */
-  struct Category
-  {
-    Category() = default;
-    inline Category(const std::string & name, int depth) : name(name), depth(depth) {}
-
-    std::string name = "";
-    int depth = -1;
-    std::vector<WidgetPtr> widgets;
-    std::vector<std::unique_ptr<Category>> categories;
-
-    void update(Client & client, SceneState & state);
-    void draw2D();
-    void draw3D(Camera camera);
-    void started();
-    void stopped();
-  };
   Category root_;
 
   /** Returns a category (creates it if it does not exist */
