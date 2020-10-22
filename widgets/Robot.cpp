@@ -1,8 +1,8 @@
-#include "../Client.h"
+#include "Robot.h"
 
 #include <mc_rbdyn/RobotLoader.h>
 
-Client::Robot::Robot(const std::string & name, const std::vector<std::string> & p) : Widget(name)
+Robot::Robot(const std::string & name, const std::vector<std::string> & p) : Widget(name)
 {
   mc_rbdyn::RobotModulePtr rm{nullptr};
   if(p.size() == 1)
@@ -30,7 +30,7 @@ Client::Robot::Robot(const std::string & name, const std::vector<std::string> & 
   model_ = std::make_unique<RobotModel>(robots_->robot());
 }
 
-void Client::Robot::data(const std::vector<std::vector<double>> & q)
+void Robot::data(const std::vector<std::vector<double>> & q)
 {
   if(model_)
   {
@@ -40,7 +40,7 @@ void Client::Robot::data(const std::vector<std::vector<double>> & q)
   }
 }
 
-void Client::Robot::draw3D(Camera camera)
+void Robot::draw3D(Camera camera)
 {
   if(model_)
   {

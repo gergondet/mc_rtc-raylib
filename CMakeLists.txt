@@ -52,7 +52,9 @@ set(main_SRC
   widgets/Category.h
   widgets/Category.cpp
   widgets/Widget.h
+  widgets/Robot.h
   widgets/Robot.cpp
+  widgets/Point3D.h
   widgets/Point3D.cpp
   ${imgui_SRC}
 )

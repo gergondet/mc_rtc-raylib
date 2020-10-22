@@ -1,5 +1,8 @@
 #include "Client.h"
 
+#include "widgets/Point3D.h"
+#include "widgets/Robot.h"
+
 void Client::update(SceneState & state)
 {
   run(buffer_, t_last_);

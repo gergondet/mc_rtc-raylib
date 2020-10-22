@@ -10,11 +10,11 @@
 
 #include "widgets/Category.h"
 
+/* Typedef for brievity */
+using ElementId = mc_control::ElementId;
+
 struct Client : public mc_control::ControllerClient
 {
-  /* Typedef for brievity */
-  using ElementId = mc_control::ElementId;
-
   /** Same constructors as the base class */
   using mc_control::ControllerClient::ControllerClient;
 
@@ -84,37 +84,5 @@ private:
       return widget<T>(id, std::forward<Args>(args)...);
     }
   }
-
-  struct Point3D : public Widget
-  {
-    Point3D(const std::string & name, const ElementId & requestId);
-
-    ~Point3D() override = default;
-
-    void data(bool ro, const Eigen::Vector3d & pos, const mc_rtc::gui::PointConfig & config);
-
-    void update(Client & client, SceneState & state) override;
-
-    void draw3D(Camera camera) override;
-
-  private:
-    ElementId requestId_;
-    std::unique_ptr<InteractiveMarker> marker_;
-  };
-
-  struct Robot : public Widget
-  {
-    Robot(const std::string & name, const std::vector<std::string> & parameters);
-
-    ~Robot() override = default;
-
-    void data(const std::vector<std::vector<double>> & q);
-
-    void draw3D(Camera camera) override;
-
-  private:
-    std::shared_ptr<mc_rbdyn::Robots> robots_;
-    std::unique_ptr<RobotModel> model_;
-  };
 };
 

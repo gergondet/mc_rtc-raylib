@@ -1,8 +1,8 @@
-#include "../Client.h"
+#include "Point3D.h"
 
-Client::Point3D::Point3D(const std::string & name, const ElementId & requestId) : Widget(name), requestId_(requestId) {}
+Point3D::Point3D(const std::string & name, const ElementId & requestId) : Widget(name), requestId_(requestId) {}
 
-void Client::Point3D::data(bool ro, const Eigen::Vector3d & pos, const mc_rtc::gui::PointConfig & config)
+void Point3D::data(bool ro, const Eigen::Vector3d & pos, const mc_rtc::gui::PointConfig & config)
 {
   if(!ro && !marker_)
   {
@@ -18,7 +18,7 @@ void Client::Point3D::data(bool ro, const Eigen::Vector3d & pos, const mc_rtc::g
   }
 }
 
-void Client::Point3D::update(Client & client, SceneState & state)
+void Point3D::update(Client & client, SceneState & state)
 {
   if(marker_)
   {
@@ -30,7 +30,7 @@ void Client::Point3D::update(Client & client, SceneState & state)
   }
 }
 
-void Client::Point3D::draw3D(Camera)
+void Point3D::draw3D(Camera)
 {
   if(marker_)
   {
