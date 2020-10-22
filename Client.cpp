@@ -1,5 +1,6 @@
 #include "Client.h"
 
+#include "widgets/Label.h"
 #include "widgets/Point3D.h"
 #include "widgets/Robot.h"
 
@@ -39,6 +40,11 @@ void Client::clear()
 
 /** We rely on widgets to create categories */
 void Client::category(const std::vector<std::string> &, const std::string &) {}
+
+void Client::label(const ElementId & id, const std::string & txt)
+{
+  widget<Label>(id).data(txt);
+}
 
 void Client::point3d(const ElementId & id,
                      const ElementId & requestId,

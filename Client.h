@@ -41,6 +41,8 @@ private:
 
   void category(const std::vector<std::string> &, const std::string &) override;
 
+  void label(const ElementId & id, const std::string & txt) override;
+
   void robot(const ElementId & id,
              const std::vector<std::string> & params,
              const std::vector<std::vector<double>> & q) override;

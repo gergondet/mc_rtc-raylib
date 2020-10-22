@@ -52,6 +52,7 @@ set(main_SRC
   widgets/Category.h
   widgets/Category.cpp
   widgets/Widget.h
+  widgets/Label.h
   widgets/Robot.h
   widgets/Robot.cpp
   widgets/Point3D.h
