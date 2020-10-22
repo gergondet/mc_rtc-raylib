@@ -63,25 +63,24 @@ void InteractiveMarker::pose(const sva::PTransformd & pose)
   }
 }
 
-void InteractiveMarker::update(Camera camera, Ray ray, SceneState & state)
+void InteractiveMarker::update(SceneState & state)
 {
+  auto & camera = *state.camera;
+  auto ray = GetMouseRay(GetMousePosition(), camera);
   for(auto & c : posControls_)
   {
-    c.hover = CheckCollisionRayBox(ray, c.bbox);
+    c.hover = CheckCollisionRayBox(ray, c.bbox) && !active_;
     if(!c.active)
     {
       if(IsMouseButtonPressed(0) && c.hover && state.mouseHandler == nullptr)
       {
         state.mouseHandler = this;
+        active_ = true;
         c.active = true;
         c.start = GetMousePosition();
         Vector2 start = GetWorldToScreen(translation(pose_), camera);
         Vector2 end = GetWorldToScreen(translation(sva::PTransformd(c.offset) * pose_), camera);
         c.dir = Vector2Subtract(end, start);
-      }
-      else
-      {
-        c.active = false;
       }
     }
     else
@@ -91,6 +90,7 @@ void InteractiveMarker::update(Camera camera, Ray ray, SceneState & state)
         if(c.active)
         {
           state.mouseHandler = nullptr;
+          active_ = false;
         }
         c.active = false;
       }
@@ -113,21 +113,18 @@ void InteractiveMarker::update(Camera camera, Ray ray, SceneState & state)
   for(auto & c : oriControls_)
   {
     auto hit = GetCollisionRayModel(ray, c.torus);
-    c.hover = hit.hit;
+    c.hover = hit.hit && !active_;
     if(!c.active)
     {
       if(IsMouseButtonPressed(0) && c.hover && state.mouseHandler == nullptr)
       {
         state.mouseHandler = this;
+        active_ = true;
         c.active = true;
         c.pZ = Vector3Transform(c.normal, convert(pose_.rotation()));
         Vector3 point = intersection(ray, c.pZ, translation(pose_));
         c.pX = Vector3Normalize(Vector3Subtract(point, translation(pose_)));
         c.pY = Vector3Normalize(Vector3CrossProduct(c.pZ, c.pX));
-      }
-      else
-      {
-        c.active = false;
       }
     }
     else
@@ -136,6 +133,7 @@ void InteractiveMarker::update(Camera camera, Ray ray, SceneState & state)
       {
         if(c.active)
         {
+          active_ = false;
           state.mouseHandler = nullptr;
         }
         c.active = false;

@@ -4,6 +4,7 @@
 
 #include <mc_rbdyn/Robots.h>
 
+#include "InteractiveMarker.h"
 #include "RobotModel.h"
 #include "SceneState.h"
 
@@ -42,6 +43,12 @@ private:
              const std::vector<std::string> & params,
              const std::vector<std::vector<double>> & q) override;
 
+  void point3d(const ElementId & id,
+               const ElementId & requestId,
+               bool ro,
+               const Eigen::Vector3d & pos,
+               const mc_rtc::gui::PointConfig & config) override;
+
   void stopped() override;
 
   /** A widget in the GUI */
@@ -53,6 +60,9 @@ private:
 
     std::string name;
     bool seen = true;
+
+    /** Update based on user interaction */
+    virtual void update(Client &, SceneState &) {}
 
     /** Draw the 2D elements of the widget */
     virtual void draw2D() {}
@@ -73,6 +83,7 @@ private:
     std::vector<WidgetPtr> widgets;
     std::vector<std::unique_ptr<Category>> categories;
 
+    void update(Client & client, SceneState & state);
     void draw2D();
     void draw3D(Camera camera);
     void started();
@@ -84,14 +95,12 @@ private:
   Category & getCategory(const std::vector<std::string> & category);
 
   /** Get a widget with the right type and id */
-  template<typename T, typename ... Args>
-  T & widget(const ElementId & id, Args && ... args)
+  template<typename T, typename... Args>
+  T & widget(const ElementId & id, Args &&... args)
   {
     auto & category = getCategory(id.category);
-    auto it = std::find_if(category.widgets.begin(), category.widgets.end(),
-                           [&](auto & w) {
-                             return w->name == id.name;
-                           });
+    auto it =
+        std::find_if(category.widgets.begin(), category.widgets.end(), [&](auto & w) { return w->name == id.name; });
     if(it == category.widgets.end())
     {
       auto & w = category.widgets.emplace_back(std::make_unique<T>(id.name, std::forward<Args>(args)...));
@@ -112,15 +121,33 @@ private:
     }
   }
 
-  struct Robot : public Widget
+  struct Point3D : public Widget
   {
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+    Point3D(const std::string & name, const ElementId & requestId);
 
-    Robot(const std::string & name, const std::vector<std::string> & parameters);
+    ~Point3D() override = default;
 
-    void update(const std::vector<std::vector<double>> & q);
+    void data(bool ro, const Eigen::Vector3d & pos, const mc_rtc::gui::PointConfig & config);
+
+    void update(Client & client, SceneState & state) override;
 
     void draw3D(Camera camera) override;
+
+  private:
+    ElementId requestId_;
+    std::unique_ptr<InteractiveMarker> marker_;
+  };
+
+  struct Robot : public Widget
+  {
+    Robot(const std::string & name, const std::vector<std::string> & parameters);
+
+    ~Robot() override = default;
+
+    void data(const std::vector<std::vector<double>> & q);
+
+    void draw3D(Camera camera) override;
+
   private:
     std::shared_ptr<mc_rbdyn::Robots> robots_;
     std::unique_ptr<RobotModel> model_;

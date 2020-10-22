@@ -37,6 +37,8 @@ set(main_SRC
   Client.h
   Client.cpp
   SceneState.h
+  widgets/Robot.cpp
+  widgets/Point3D.cpp
 )
 
 add_executable(main ${main_SRC})

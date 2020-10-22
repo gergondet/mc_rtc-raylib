@@ -38,11 +38,21 @@ struct InteractiveMarker
 
   void pose(const sva::PTransformd & pose);
 
-  void update(Camera camera, Ray ray, SceneState & state);
+  inline const sva::PTransformd & pose() const noexcept
+  {
+    return pose_;
+  }
+
+  void update(SceneState & state);
 
   void draw();
 
+  inline bool active()
+  {
+    return active_;
+  }
 private:
+  bool active_ = false;
   sva::PTransformd pose_;
   float size = 0.05;
   struct MarkerPositionControl

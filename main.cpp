@@ -6,7 +6,6 @@
 
 #include "Camera.h"
 #include "Client.h"
-#include "InteractiveMarker.h"
 #include "utils.h"
 
 int main(void)
@@ -28,22 +27,18 @@ int main(void)
   camera.type = CAMERA_PERSPECTIVE;           // Camera mode type
 
   Client client("ipc:///tmp/mc_rtc_pub.ipc", "ipc:///tmp/mc_rtc_rep.ipc", 1);
-  InteractiveMarker marker({Eigen::Matrix3d::Identity(), Eigen::Vector3d(0, 0, 0)}, ControlAxis::TX | ControlAxis::TY | ControlAxis::RZ);
 
   SetCameraMode(camera, CAMERA_FREE); // Set a free camera mode
 
   SetTargetFPS(60);           // Set our game to run at 60 frames-per-second
 
   SceneState state;
+  state.camera = &camera;
 
   // Main game loop
   while (!WindowShouldClose())    // Detect window close button or ESC key
   {
     client.update(state);
-    {
-      auto ray = GetMouseRay(GetMousePosition(), camera);
-      marker.update(camera, ray, state);
-    }
     camera.update(state);
     //----------------------------------------------------------------------------------
 
@@ -58,8 +53,6 @@ int main(void)
         DrawGridXY(10, 1.0f);
 
         DrawGizmo({0, 0, 0});
-
-        marker.draw();
 
         client.draw3D(camera);
 

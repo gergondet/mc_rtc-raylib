@@ -1,10 +1,9 @@
 #include "Client.h"
 
-#include <mc_rbdyn/RobotLoader.h>
-
-void Client::update(SceneState &)
+void Client::update(SceneState & state)
 {
   run(buffer_, t_last_);
+  root_.update(*this, state);
 }
 
 void Client::draw2D()
@@ -36,12 +35,22 @@ void Client::clear()
 /** We rely on widgets to create categories */
 void Client::category(const std::vector<std::string> &, const std::string &) {}
 
+void Client::point3d(const ElementId & id,
+                     const ElementId & requestId,
+                     bool ro,
+                     const Eigen::Vector3d & pos,
+                     const mc_rtc::gui::PointConfig & config)
+{
+  auto & point = widget<Point3D>(id, requestId);
+  point.data(ro, pos, config);
+}
+
 void Client::robot(const ElementId & id,
                    const std::vector<std::string> & params,
                    const std::vector<std::vector<double>> & q)
 {
   auto & robot = widget<Robot>(id, params);
-  robot.update(q);
+  robot.data(q);
 }
 
 auto Client::getCategory(const std::vector<std::string> & category) -> Category &
@@ -62,6 +71,18 @@ auto Client::getCategory(const std::vector<std::string> & category) -> Category 
     }
   }
   return out.get();
+}
+
+void Client::Category::update(Client & client, SceneState & state)
+{
+  for(auto & w : widgets)
+  {
+    w->update(client, state);
+  }
+  for(auto & cat : categories)
+  {
+    cat->update(client, state);
+  }
 }
 
 void Client::Category::draw2D()
@@ -107,10 +128,10 @@ void Client::Category::stopped()
   {
     cat->stopped();
   }
-  /** Remove categories that have no active widgets */
+  /** Remove empty categories */
   {
     auto it =
-        std::remove_if(categories.begin(), categories.end(), [](const auto & c) { return c->widgets.size() == 0; });
+        std::remove_if(categories.begin(), categories.end(), [](const auto & c) { return c->widgets.size() == 0 && c->categories.size() == 0; });
     categories.erase(it, categories.end());
   }
   /** Remove widgets that have not been seen */
@@ -120,48 +141,3 @@ void Client::Category::stopped()
   }
 }
 
-Client::Robot::Robot(const std::string & name, const std::vector<std::string> & p) : Widget(name)
-{
-  mc_rbdyn::RobotModulePtr rm{nullptr};
-  if(p.size() == 1)
-  {
-    rm = mc_rbdyn::RobotLoader::get_robot_module(p[0]);
-  }
-  if(p.size() == 2)
-  {
-    rm = mc_rbdyn::RobotLoader::get_robot_module(p[0], p[1]);
-  }
-  if(p.size() == 3)
-  {
-    rm = mc_rbdyn::RobotLoader::get_robot_module(p[0], p[1], p[2]);
-  }
-  if(p.size() > 3)
-  {
-    mc_rtc::log::warning("Too many parameters provided to load the robot, complain to the developpers of this package");
-  }
-  if(!rm)
-  {
-    mc_rtc::log::error("RobotWidget {} cannot be displayed as the RobotModule cannot be loaded", name);
-    return;
-  }
-  robots_ = mc_rbdyn::loadRobot(*rm);
-  model_ = std::make_unique<RobotModel>(robots_->robot());
-}
-
-void Client::Robot::update(const std::vector<std::vector<double>> & q)
-{
-  if(model_)
-  {
-    robots_->robot().mbc().q = q;
-    robots_->robot().forwardKinematics();
-    model_->update(robots_->robot());
-  }
-}
-
-void Client::Robot::draw3D(Camera camera)
-{
-  if(model_)
-  {
-    model_->draw(camera);
-  }
-}
