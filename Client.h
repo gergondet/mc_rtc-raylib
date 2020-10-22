@@ -47,6 +47,8 @@ private:
                    const std::vector<std::string> & labels,
                    const Eigen::VectorXd & data) override;
 
+  void button(const ElementId & id) override;
+
   void robot(const ElementId & id,
              const std::vector<std::string> & params,
              const std::vector<std::vector<double>> & q) override;
