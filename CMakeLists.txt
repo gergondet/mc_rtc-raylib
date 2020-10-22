@@ -23,6 +23,18 @@ set(SUPPORT_FILEFORMAT_BMP ON CACHE BOOL "" FORCE) # Support for loading bmp fil
 set(SUPPORT_FILEFORMAT_JPG ON CACHE BOOL "" FORCE) # Support for loading jpg files
 add_subdirectory(raylib)
 
+set(imgui_SRC
+  imgui/imgui.h
+  imgui/imgui.cpp
+  imgui/imgui_demo.cpp
+  imgui/imgui_draw.cpp
+  imgui/imgui_widgets.cpp
+  imgui/backends/imgui_impl_opengl3.h
+  imgui/backends/imgui_impl_opengl3.cpp
+  imgui_impl_raylib.cpp
+  imgui_impl_raylib.h
+)
+
 set(main_SRC
   main.cpp
   RobotModel.h
@@ -39,9 +51,18 @@ set(main_SRC
   SceneState.h
   widgets/Robot.cpp
   widgets/Point3D.cpp
+  ${imgui_SRC}
 )
 
+file(COPY raylib/src/external/glad.h DESTINATION "${PROJECT_BINARY_DIR}/include/glad/")
+
 add_executable(main ${main_SRC})
-target_compile_definitions(main PUBLIC R3D_ASSIMP_SUPPORT)
+target_compile_definitions(main PUBLIC R3D_ASSIMP_SUPPORT IMGUI_IMPL_OPENGL_LOADER_GLAD)
 target_link_libraries(main PUBLIC raylib mc_rtc::mc_control_client mc_rtc::mc_control ${ASSIMP_LIBRARIES})
-target_include_directories(main PUBLIC ${ASSIMP_INCLUDE_DIRS} "${PROJECT_SOURCE_DIR}/raylib-3D")
+target_include_directories(main PUBLIC
+  ${ASSIMP_INCLUDE_DIRS}
+  "${PROJECT_SOURCE_DIR}/raylib-3D"
+  "${PROJECT_SOURCE_DIR}/imgui"
+  "${PROJECT_SOURCE_DIR}/imgui/backends"
+  "${PROJECT_BINARY_DIR}/include/"
+)

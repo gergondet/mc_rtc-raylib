@@ -8,14 +8,19 @@
 #include "Client.h"
 #include "utils.h"
 
+#include "imgui.h"
+#include "imgui_impl_opengl3.h"
+#include "imgui_impl_raylib.h"
+
 int main(void)
 {
   // Initialization
   //--------------------------------------------------------------------------------------
-  const int screenWidth = 1600 / 2;
-  const int screenHeight = 900 / 2;
+  const int screenWidth = 1600;
+  const int screenHeight = 900;
 
   SetConfigFlags(FLAG_MSAA_4X_HINT);  // Enable Multi Sampling Anti Aliasing 4x (if available)
+  SetTraceLogLevel(LOG_WARNING);
   InitWindow(screenWidth, screenHeight, "mc_rtc - raylib based 3D GUI");
 
   // Define the camera to look into our 3d world
@@ -32,12 +37,33 @@ int main(void)
 
   SetTargetFPS(60);           // Set our game to run at 60 frames-per-second
 
+  ImGui::CreateContext();
+  ImGuiIO & io = ImGui::GetIO();
+  ImGui::StyleColorsDark();
+
+  ImGui_ImplOpenGL3_Init();
+  ImGui_ImplRaylib_Init();
+
   SceneState state;
   state.camera = &camera;
 
   // Main game loop
   while (!WindowShouldClose())    // Detect window close button or ESC key
   {
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplRaylib_NewFrame();
+    ImGui::NewFrame();
+    ImGui_ImplRaylib_ProcessEvent();
+
+    if(io.WantCaptureMouse && state.mouseHandler == nullptr)
+    {
+      state.mouseHandler = &io;
+    }
+    else if(!io.WantCaptureMouse && state.mouseHandler == &io)
+    {
+      state.mouseHandler = nullptr;
+    }
+
     client.update(state);
     camera.update(state);
     //----------------------------------------------------------------------------------
@@ -60,11 +86,18 @@ int main(void)
 
       DrawFPS(10, 10);
 
+      ImGui::ShowDemoWindow();
+      ImGui::Render();
+      ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
     EndDrawing();
     //----------------------------------------------------------------------------------
   }
 
   client.clear();
+
+  ImGui_ImplRaylib_Shutdown();
+  ImGui_ImplOpenGL3_Shutdown();
 
   // De-Initialization
   //--------------------------------------------------------------------------------------
