@@ -14,16 +14,26 @@ void Category::update(Client & client, SceneState & state)
 
 void Category::draw2D()
 {
+  int sid = -100;
   for(auto & w : widgets)
   {
+    if(w->id.sid == sid && sid != -1)
+    {
+      ImGui::SameLine();
+    }
+    else if(sid != -100)
+    {
+      ImGui::Separator();
+    }
     w->draw2D();
-  }
-  if(widgets.size())
-  {
-    ImGui::Separator();
+    sid = w->id.sid;
   }
   if(categories.size())
   {
+    if(widgets.size())
+    {
+      ImGui::Separator();
+    }
     std::sort(categories.begin(), categories.end(),
               [](const auto & lhs, const auto & rhs) { return lhs->name < rhs->name; });
     ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_Reorderable;
