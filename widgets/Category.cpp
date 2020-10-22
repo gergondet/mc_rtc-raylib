@@ -24,6 +24,8 @@ void Category::draw2D()
   }
   if(categories.size())
   {
+    std::sort(categories.begin(), categories.end(),
+              [](const auto & lhs, const auto & rhs) { return lhs->name < rhs->name; });
     ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_Reorderable;
     if(ImGui::BeginTabBar(name.c_str(), tab_bar_flags))
     {
