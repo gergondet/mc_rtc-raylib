@@ -43,6 +43,8 @@ private:
 
   void label(const ElementId & id, const std::string & txt) override;
 
+  void checkbox(const ElementId & id, bool state) override;
+
   void array_label(const ElementId & id,
                    const std::vector<std::string> & labels,
                    const Eigen::VectorXd & data) override;

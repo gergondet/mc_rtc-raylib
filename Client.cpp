@@ -2,6 +2,7 @@
 
 #include "widgets/ArrayLabel.h"
 #include "widgets/Button.h"
+#include "widgets/Checkbox.h"
 #include "widgets/Label.h"
 #include "widgets/Point3D.h"
 #include "widgets/Robot.h"
@@ -56,6 +57,11 @@ void Client::array_label(const ElementId & id, const std::vector<std::string> & 
 void Client::button(const ElementId & id)
 {
   widget<Button>(id);
+}
+
+void Client::checkbox(const ElementId & id, bool state)
+{
+  widget<Checkbox>(id).data(state);
 }
 
 void Client::point3d(const ElementId & id,
