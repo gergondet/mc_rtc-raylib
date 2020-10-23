@@ -20,6 +20,7 @@ int main(void)
   const int screenHeight = 900;
 
   SetConfigFlags(FLAG_MSAA_4X_HINT);  // Enable Multi Sampling Anti Aliasing 4x (if available)
+  SetConfigFlags(FLAG_WINDOW_RESIZABLE);
   SetTraceLogLevel(LOG_WARNING);
   InitWindow(screenWidth, screenHeight, "mc_rtc - raylib based 3D GUI");
 
