@@ -4,6 +4,7 @@
 #include "widgets/ArrayLabel.h"
 #include "widgets/Button.h"
 #include "widgets/Checkbox.h"
+#include "widgets/ComboInput.h"
 #include "widgets/IntegerInput.h"
 #include "widgets/Label.h"
 #include "widgets/NumberInput.h"
@@ -14,8 +15,8 @@
 
 void Client::update(SceneState & state)
 {
-  run(buffer_, t_last_);
   root_.update(*this, state);
+  run(buffer_, t_last_);
 }
 
 void Client::draw2D()
@@ -92,6 +93,11 @@ void Client::number_slider(const ElementId & id, double data, double min, double
 void Client::array_input(const ElementId & id, const std::vector<std::string> & labels, const Eigen::VectorXd & data)
 {
   widget<ArrayInput>(id).data(labels, data);
+}
+
+void Client::combo_input(const ElementId & id, const std::vector<std::string> & values, const std::string & data)
+{
+  widget<ComboInput>(id).data(values, data);
 }
 
 void Client::point3d(const ElementId & id,
