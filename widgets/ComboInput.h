@@ -61,5 +61,5 @@ struct ComboInput : public Widget
 protected:
   std::vector<std::string> values_;
   std::string data_;
-  bool changed_;
+  bool changed_ = false;
 };
