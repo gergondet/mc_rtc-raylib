@@ -70,16 +70,14 @@ void Client::point3d(const ElementId & id,
                      const Eigen::Vector3d & pos,
                      const mc_rtc::gui::PointConfig & config)
 {
-  auto & point = widget<Point3D>(id, requestId);
-  point.data(ro, pos, config);
+  widget<Point3D>(id, requestId).data(ro, pos, config);
 }
 
 void Client::robot(const ElementId & id,
                    const std::vector<std::string> & params,
                    const std::vector<std::vector<double>> & q)
 {
-  auto & robot = widget<Robot>(id, params);
-  robot.data(q);
+  widget<Robot>(id, params).data(q);
 }
 
 auto Client::getCategory(const std::vector<std::string> & category) -> Category &
