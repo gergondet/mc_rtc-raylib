@@ -6,6 +6,7 @@
 #include "widgets/Label.h"
 #include "widgets/Point3D.h"
 #include "widgets/Robot.h"
+#include "widgets/StringInput.h"
 
 void Client::update(SceneState & state)
 {
@@ -62,6 +63,11 @@ void Client::button(const ElementId & id)
 void Client::checkbox(const ElementId & id, bool state)
 {
   widget<Checkbox>(id).data(state);
+}
+
+void Client::string_input(const ElementId & id, const std::string & data)
+{
+  widget<StringInput>(id).data(data);
 }
 
 void Client::point3d(const ElementId & id,
