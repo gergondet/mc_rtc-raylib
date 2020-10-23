@@ -15,7 +15,7 @@ struct Checkbox : public Widget
 
   inline void draw2D() override
   {
-    if(ImGui::Checkbox(id.name.c_str(), &data_))
+    if(ImGui::Checkbox(label(id.name).c_str(), &data_))
     {
       clicked_ = true;
     }

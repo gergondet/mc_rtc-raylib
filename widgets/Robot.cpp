@@ -53,8 +53,8 @@ void Robot::data(const std::vector<std::vector<double>> & q)
 
 void Robot::draw2D()
 {
-  ImGui::Checkbox(fmt::format("Display {}", id.name).c_str(), &display_);
-  ImGui::Checkbox(fmt::format("Display {} collision model", id.name).c_str(), &displayCollision_);
+  ImGui::Checkbox(label(fmt::format("Display {}", id.name)).c_str(), &display_);
+  ImGui::Checkbox(label(fmt::format("Display {} collision model", id.name)).c_str(), &displayCollision_);
 }
 
 void Robot::draw3D(Camera camera)

@@ -37,6 +37,11 @@ struct Widget
 
   /** Draw the 3D elements of the widget */
   virtual void draw3D(Camera) {}
+
+  inline std::string label(std::string_view label, std::string_view extra = "")
+  {
+    return fmt::format("{}##{}{}{}", label, id.category, id.name, extra);
+  }
 };
 
 using WidgetPtr = std::unique_ptr<Widget>;

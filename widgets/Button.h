@@ -10,7 +10,7 @@ struct Button : public Widget
 
   inline void draw2D() override
   {
-    if(ImGui::Button(id.name.c_str()))
+    if(ImGui::Button(label(id.name).c_str()))
     {
       clicked_ = true;
     }

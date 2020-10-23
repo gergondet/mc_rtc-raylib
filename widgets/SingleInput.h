@@ -28,7 +28,7 @@ struct SingleInput : public Widget
     ImGui::SameLine();
     if(!busy_)
     {
-      if(ImGui::Button("Edit"))
+      if(ImGui::Button(label("Edit").c_str()))
       {
         busy_ = true;
         setupBuffer();
@@ -37,16 +37,18 @@ struct SingleInput : public Widget
     }
     else
     {
-      if(ImGui::Button("Done")
-         || fn(fmt::format("##{}{}Input", id.category, id.name).c_str(), std::forward<Args>(args)...,
-               ImGuiInputTextFlags_EnterReturnsTrue))
+      if(ImGui::Button(label("Done").c_str())
+         || fn(label("", "Input").c_str(), std::forward<Args>(args)..., ImGuiInputTextFlags_EnterReturnsTrue))
       {
-        busy_ = false;
         auto nData = dataFromBuffer();
         if(nData != data_)
         {
           changed_ = true;
           data_ = nData;
+        }
+        else
+        {
+          busy_ = false;
         }
       }
     }
@@ -57,6 +59,7 @@ struct SingleInput : public Widget
     if(changed_)
     {
       changed_ = false;
+      busy_ = false;
       client.send_request(id, data_);
     }
   }
