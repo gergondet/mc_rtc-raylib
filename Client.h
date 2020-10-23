@@ -47,6 +47,8 @@ private:
 
   void string_input(const ElementId & id, const std::string & data) override;
 
+  void integer_input(const ElementId & id, int data) override;
+
   void array_label(const ElementId & id,
                    const std::vector<std::string> & labels,
                    const Eigen::VectorXd & data) override;

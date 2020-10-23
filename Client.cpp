@@ -3,6 +3,7 @@
 #include "widgets/ArrayLabel.h"
 #include "widgets/Button.h"
 #include "widgets/Checkbox.h"
+#include "widgets/IntegerInput.h"
 #include "widgets/Label.h"
 #include "widgets/Point3D.h"
 #include "widgets/Robot.h"
@@ -68,6 +69,11 @@ void Client::checkbox(const ElementId & id, bool state)
 void Client::string_input(const ElementId & id, const std::string & data)
 {
   widget<StringInput>(id).data(data);
+}
+
+void Client::integer_input(const ElementId & id, int data)
+{
+  widget<IntegerInput>(id).data(data);
 }
 
 void Client::point3d(const ElementId & id,
