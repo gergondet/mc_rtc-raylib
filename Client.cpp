@@ -5,6 +5,7 @@
 #include "widgets/Button.h"
 #include "widgets/Checkbox.h"
 #include "widgets/ComboInput.h"
+#include "widgets/DataComboInput.h"
 #include "widgets/IntegerInput.h"
 #include "widgets/Label.h"
 #include "widgets/NumberInput.h"
@@ -98,6 +99,11 @@ void Client::array_input(const ElementId & id, const std::vector<std::string> & 
 void Client::combo_input(const ElementId & id, const std::vector<std::string> & values, const std::string & data)
 {
   widget<ComboInput>(id).data(values, data);
+}
+
+void Client::data_combo_input(const ElementId & id, const std::vector<std::string> & values, const std::string & data)
+{
+  widget<DataComboInput>(id).data(values, data);
 }
 
 void Client::point3d(const ElementId & id,

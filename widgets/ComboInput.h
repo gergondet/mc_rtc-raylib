@@ -58,7 +58,7 @@ struct ComboInput : public Widget
     }
   }
 
-private:
+protected:
   std::vector<std::string> values_;
   std::string data_;
   bool changed_;

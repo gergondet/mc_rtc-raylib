@@ -30,6 +30,11 @@ struct Client : public mc_control::ControllerClient
   /** Remove all elements */
   void clear();
 
+  inline const mc_rtc::Configuration & data() const noexcept
+  {
+    return data_;
+  }
+
 private:
   std::vector<char> buffer_ = std::vector<char>(65535);
   std::chrono::system_clock::time_point t_last_ = std::chrono::system_clock::now();
@@ -64,6 +69,8 @@ private:
                    const Eigen::VectorXd & data) override;
 
   void combo_input(const ElementId & id, const std::vector<std::string> & values, const std::string & data) override;
+
+  void data_combo_input(const ElementId & id, const std::vector<std::string> & ref, const std::string & data) override;
 
   void robot(const ElementId & id,
              const std::vector<std::string> & params,
