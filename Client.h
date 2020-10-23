@@ -43,6 +43,12 @@ private:
 
   void label(const ElementId & id, const std::string & txt) override;
 
+  void array_label(const ElementId & id,
+                   const std::vector<std::string> & labels,
+                   const Eigen::VectorXd & data) override;
+
+  void button(const ElementId & id) override;
+
   void checkbox(const ElementId & id, bool state) override;
 
   void string_input(const ElementId & id, const std::string & data) override;
@@ -53,11 +59,9 @@ private:
 
   void number_slider(const ElementId & id, double data, double min, double max) override;
 
-  void array_label(const ElementId & id,
+  void array_input(const ElementId & id,
                    const std::vector<std::string> & labels,
                    const Eigen::VectorXd & data) override;
-
-  void button(const ElementId & id) override;
 
   void robot(const ElementId & id,
              const std::vector<std::string> & params,

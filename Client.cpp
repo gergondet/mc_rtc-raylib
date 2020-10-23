@@ -1,5 +1,6 @@
 #include "Client.h"
 
+#include "widgets/ArrayInput.h"
 #include "widgets/ArrayLabel.h"
 #include "widgets/Button.h"
 #include "widgets/Checkbox.h"
@@ -86,6 +87,11 @@ void Client::number_input(const ElementId & id, double data)
 void Client::number_slider(const ElementId & id, double data, double min, double max)
 {
   widget<NumberSlider>(id).data(data, min, max);
+}
+
+void Client::array_input(const ElementId & id, const std::vector<std::string> & labels, const Eigen::VectorXd & data)
+{
+  widget<ArrayInput>(id).data(labels, data);
 }
 
 void Client::point3d(const ElementId & id,
