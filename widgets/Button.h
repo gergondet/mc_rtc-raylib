@@ -21,6 +21,7 @@ struct Button : public Widget
     if(clicked_)
     {
       client.send_request(id);
+      clicked_ = false;
     }
   }
 
