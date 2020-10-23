@@ -8,7 +8,7 @@ struct ArrayInput : public Widget
 
   ~ArrayInput() override = default;
 
-  inline bool data(const std::vector<std::string> & labels, const Eigen::VectorXd & data)
+  inline void data(const std::vector<std::string> & labels, const Eigen::VectorXd & data)
   {
     if(!busy_)
     {

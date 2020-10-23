@@ -8,7 +8,7 @@ struct Checkbox : public Widget
 
   ~Checkbox() override = default;
 
-  inline bool data(bool data)
+  inline void data(bool data)
   {
     data_ = data;
   }
