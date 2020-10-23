@@ -51,6 +51,8 @@ private:
 
   void number_input(const ElementId & id, double data) override;
 
+  void number_slider(const ElementId & id, double data, double min, double max) override;
+
   void array_label(const ElementId & id,
                    const std::vector<std::string> & labels,
                    const Eigen::VectorXd & data) override;

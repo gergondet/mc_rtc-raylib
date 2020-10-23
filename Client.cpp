@@ -6,6 +6,7 @@
 #include "widgets/IntegerInput.h"
 #include "widgets/Label.h"
 #include "widgets/NumberInput.h"
+#include "widgets/NumberSlider.h"
 #include "widgets/Point3D.h"
 #include "widgets/Robot.h"
 #include "widgets/StringInput.h"
@@ -80,6 +81,11 @@ void Client::integer_input(const ElementId & id, int data)
 void Client::number_input(const ElementId & id, double data)
 {
   widget<NumberInput>(id).data(data);
+}
+
+void Client::number_slider(const ElementId & id, double data, double min, double max)
+{
+  widget<NumberSlider>(id).data(data, min, max);
 }
 
 void Client::point3d(const ElementId & id,
