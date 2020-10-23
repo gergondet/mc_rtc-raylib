@@ -2,10 +2,10 @@
 
 #include "utils.h"
 
+#include "r3d.h"
 #include "raylib.h"
 #include "raymath.h"
 #include "rlgl.h"
-#include "r3d.h"
 
 #include <SpaceVecAlg/Conversions.h>
 
@@ -14,8 +14,7 @@
 #include <boost/filesystem.hpp>
 namespace bfs = boost::filesystem;
 
-
-std::string GOOSH_VERTEX_SHADER=R"(
+std::string GOOSH_VERTEX_SHADER = R"(
 #version 330
 
 // Input vertex attributes
@@ -51,7 +50,7 @@ void main()
 
 // Fragment shader from https://rendermeapangolin.wordpress.com/2015/05/07/gooch-shading/
 
-std::string GOOSH_FRAGMENT_SHADER=R"(
+std::string GOOSH_FRAGMENT_SHADER = R"(
 #version 330
 
 // Vertex attributes
@@ -150,7 +149,8 @@ BodyDrawer::BodyDrawer(const std::vector<rbd::parsers::Visual> & v, Shader shade
     auto path = convertURI(mesh.filename);
     auto cwd = bfs::current_path();
     bfs::current_path(path.parent_path());
-    models_.emplace_back(new ModelData{LoadModelAdvanced(path.string().c_str()), path.leaf().string(), static_cast<float>(mesh.scale), v.origin});
+    models_.emplace_back(new ModelData{LoadModelAdvanced(path.string().c_str()), path.leaf().string(),
+                                       static_cast<float>(mesh.scale), v.origin});
     for(int i = 0; i < models_.back()->model.materialCount; ++i)
     {
       models_.back()->model.materials[i].shader = shader;
@@ -216,7 +216,7 @@ void RobotModel::update(const mc_rbdyn::Robot & robot)
 
 void RobotModel::draw(Camera camera)
 {
-  float cameraPos[3] = { camera.position.x, camera.position.y, camera.position.z };
+  float cameraPos[3] = {camera.position.x, camera.position.y, camera.position.z};
   SetShaderValue(shader_, shader_.locs[LOC_VECTOR_VIEW], cameraPos, UNIFORM_VEC3);
   for(auto & b : bodies_)
   {

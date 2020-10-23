@@ -51,6 +51,7 @@ struct InteractiveMarker
   {
     return active_;
   }
+
 private:
   bool active_ = false;
   sva::PTransformd pose_;

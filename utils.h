@@ -1,7 +1,7 @@
 #pragma once
 
-#include <SpaceVecAlg/SpaceVecAlg>
 #include <SpaceVecAlg/Conversions.h>
+#include <SpaceVecAlg/SpaceVecAlg>
 
 #include "raylib.h"
 #include "raymath.h"

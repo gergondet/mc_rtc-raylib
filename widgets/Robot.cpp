@@ -45,7 +45,7 @@ void Robot::data(const std::vector<std::vector<double>> & q)
   {
     if(!collisionModel_)
     {
-      collisionModel_  = std::make_unique<RobotModel>(robots_->robot(), true);
+      collisionModel_ = std::make_unique<RobotModel>(robots_->robot(), true);
     }
     collisionModel_->update(robots_->robot());
   }
@@ -68,4 +68,3 @@ void Robot::draw3D(Camera camera)
     collisionModel_->draw(camera);
   }
 }
-

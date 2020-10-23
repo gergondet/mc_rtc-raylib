@@ -11,6 +11,7 @@ struct BodyDrawer
   void update(const sva::PTransformd & pos);
 
   void draw();
+
 private:
   struct ModelData
   {
@@ -32,6 +33,7 @@ struct RobotModel
   void update(const mc_rbdyn::Robot & robot);
 
   void draw(Camera camera);
+
 private:
   std::vector<BodyDrawer> bodies_;
   Shader shader_;

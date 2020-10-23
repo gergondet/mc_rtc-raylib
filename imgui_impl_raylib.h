@@ -2,13 +2,14 @@
 #define IMGUI_IMPL_RAYLIB
 
 #if defined(__cplusplus)
-extern "C" {
+extern "C"
+{
 #endif
 
-IMGUI_IMPL_API bool     ImGui_ImplRaylib_Init();
-IMGUI_IMPL_API void     ImGui_ImplRaylib_Shutdown();
-IMGUI_IMPL_API void     ImGui_ImplRaylib_NewFrame();
-IMGUI_IMPL_API bool     ImGui_ImplRaylib_ProcessEvent();
+  IMGUI_IMPL_API bool ImGui_ImplRaylib_Init();
+  IMGUI_IMPL_API void ImGui_ImplRaylib_Shutdown();
+  IMGUI_IMPL_API void ImGui_ImplRaylib_NewFrame();
+  IMGUI_IMPL_API bool ImGui_ImplRaylib_ProcessEvent();
 
 #if defined(__cplusplus)
 }

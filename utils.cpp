@@ -46,33 +46,33 @@ Vector3 intersection(Ray ray, Vector3 normal, Vector3 point)
 
 void DrawGridXY(int slices, float spacing)
 {
-    int halfSlices = slices/2;
+  int halfSlices = slices / 2;
 
-    if (rlCheckBufferLimit(slices*4)) rlglDraw();
+  if(rlCheckBufferLimit(slices * 4)) rlglDraw();
 
-    rlBegin(RL_LINES);
-        for (int i = -halfSlices; i <= halfSlices; i++)
-        {
-            if (i == 0)
-            {
-                rlColor3f(0.5f, 0.5f, 0.5f);
-                rlColor3f(0.5f, 0.5f, 0.5f);
-                rlColor3f(0.5f, 0.5f, 0.5f);
-                rlColor3f(0.5f, 0.5f, 0.5f);
-            }
-            else
-            {
-                rlColor3f(0.75f, 0.75f, 0.75f);
-                rlColor3f(0.75f, 0.75f, 0.75f);
-                rlColor3f(0.75f, 0.75f, 0.75f);
-                rlColor3f(0.75f, 0.75f, 0.75f);
-            }
+  rlBegin(RL_LINES);
+  for(int i = -halfSlices; i <= halfSlices; i++)
+  {
+    if(i == 0)
+    {
+      rlColor3f(0.5f, 0.5f, 0.5f);
+      rlColor3f(0.5f, 0.5f, 0.5f);
+      rlColor3f(0.5f, 0.5f, 0.5f);
+      rlColor3f(0.5f, 0.5f, 0.5f);
+    }
+    else
+    {
+      rlColor3f(0.75f, 0.75f, 0.75f);
+      rlColor3f(0.75f, 0.75f, 0.75f);
+      rlColor3f(0.75f, 0.75f, 0.75f);
+      rlColor3f(0.75f, 0.75f, 0.75f);
+    }
 
-            rlVertex3f((float)i*spacing, (float)-halfSlices*spacing, 0.0f);
-            rlVertex3f((float)i*spacing, (float)halfSlices*spacing, 0.0f);
+    rlVertex3f((float)i * spacing, (float)-halfSlices * spacing, 0.0f);
+    rlVertex3f((float)i * spacing, (float)halfSlices * spacing, 0.0f);
 
-            rlVertex3f((float)-halfSlices*spacing, (float)i*spacing, 0.0f);
-            rlVertex3f((float)halfSlices*spacing, (float)i*spacing, 0.0f);
-        }
-    rlEnd();
+    rlVertex3f((float)-halfSlices * spacing, (float)i * spacing, 0.0f);
+    rlVertex3f((float)halfSlices * spacing, (float)i * spacing, 0.0f);
+  }
+  rlEnd();
 }

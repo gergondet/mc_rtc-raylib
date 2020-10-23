@@ -17,6 +17,7 @@ struct Label : public Widget
   {
     ImGui::LabelText(txt_.c_str(), "%s", id.name.c_str());
   }
+
 private:
   std::string txt_;
 };

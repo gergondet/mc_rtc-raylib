@@ -5,6 +5,7 @@
 struct OrbitCamera : public Camera
 {
   void update(SceneState & state);
+
 private:
   bool rotate = false;
   bool pan = false;

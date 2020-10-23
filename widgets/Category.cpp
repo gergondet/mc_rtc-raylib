@@ -85,8 +85,8 @@ void Category::stopped()
   }
   /** Remove empty categories */
   {
-    auto it =
-        std::remove_if(categories.begin(), categories.end(), [](const auto & c) { return c->widgets.size() == 0 && c->categories.size() == 0; });
+    auto it = std::remove_if(categories.begin(), categories.end(),
+                             [](const auto & c) { return c->widgets.size() == 0 && c->categories.size() == 0; });
     categories.erase(it, categories.end());
   }
   /** Remove widgets that have not been seen */

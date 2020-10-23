@@ -42,8 +42,8 @@ void OrbitCamera::update(SceneState & state)
     if(pan)
     {
       float scale = 0.01;
-      Vector3 dright = Vector3Scale(right, -scale*(GetMousePosition().x - start.x));
-      Vector3 dup = Vector3Scale(upAx, scale*(GetMousePosition().y - start.y));
+      Vector3 dright = Vector3Scale(right, -scale * (GetMousePosition().x - start.x));
+      Vector3 dup = Vector3Scale(upAx, scale * (GetMousePosition().y - start.y));
       Vector3 diff = Vector3Add(dright, dup);
       start = GetMousePosition();
       position = Vector3Add(position, diff);
@@ -58,9 +58,8 @@ void OrbitCamera::update(SceneState & state)
       float scale = -0.01;
       float dphi = scale * (GetMousePosition().x - start.x);
       float dtheta = scale * (GetMousePosition().y - start.y);
-      Vector3 ns = { r * sin(theta + dtheta) * cos(phi + dphi),
-                     r * sin(theta + dtheta) * sin(phi + dphi),
-                     r * cos(theta + dtheta) };
+      Vector3 ns = {r * sin(theta + dtheta) * cos(phi + dphi), r * sin(theta + dtheta) * sin(phi + dphi),
+                    r * cos(theta + dtheta)};
       position = Vector3Add(target, ns);
       start = GetMousePosition();
     }
