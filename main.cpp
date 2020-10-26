@@ -79,9 +79,9 @@ int main(void)
 
     DrawGridXY(10, 1.0f);
 
-    DrawGizmo({0, 0, 0});
-
     client.draw3D(camera);
+
+    DrawFrame(sva::PTransformd::Identity());
 
     EndMode3D();
 

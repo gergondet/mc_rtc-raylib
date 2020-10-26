@@ -76,3 +76,112 @@ void DrawGridXY(int slices, float spacing)
   }
   rlEnd();
 }
+
+void DrawCylinderEx(Vector3 position,
+                    Vector3 normal,
+                    float radiusTop,
+                    float radiusBottom,
+                    float height,
+                    int sides,
+                    Color color)
+{
+  if(sides < 3) sides = 3;
+  normal = Vector3Normalize(normal);
+
+  int numVertex = sides * 6;
+  if(rlCheckBufferLimit(numVertex)) rlglDraw();
+
+  rlPushMatrix();
+  {
+    rlLoadIdentity();
+    rlTranslatef(position.x, position.y, position.z);
+    auto vec = Vector3CrossProduct({0, 1, 0}, normal);
+    rlRotatef(RAD2DEG * acosf(Vector3DotProduct({0, 1, 0}, normal)), vec.x, vec.y, vec.z);
+
+    rlBegin(RL_TRIANGLES);
+    {
+      rlColor4ub(color.r, color.g, color.b, color.a);
+
+      if(radiusTop > 0)
+      {
+        // Draw Body
+        for(int i = 0; i < 360; i += 360 / sides)
+        {
+          rlVertex3f(sinf(DEG2RAD * i) * radiusBottom, 0, cosf(DEG2RAD * i) * radiusBottom); // Bottom Left
+          rlVertex3f(sinf(DEG2RAD * (i + 360 / sides)) * radiusBottom, 0,
+                     cosf(DEG2RAD * (i + 360 / sides)) * radiusBottom); // Bottom Right
+          rlVertex3f(sinf(DEG2RAD * (i + 360 / sides)) * radiusTop, height,
+                     cosf(DEG2RAD * (i + 360 / sides)) * radiusTop); // Top Right
+
+          rlVertex3f(sinf(DEG2RAD * i) * radiusTop, height, cosf(DEG2RAD * i) * radiusTop); // Top Left
+          rlVertex3f(sinf(DEG2RAD * i) * radiusBottom, 0, cosf(DEG2RAD * i) * radiusBottom); // Bottom Left
+          rlVertex3f(sinf(DEG2RAD * (i + 360 / sides)) * radiusTop, height,
+                     cosf(DEG2RAD * (i + 360 / sides)) * radiusTop); // Top Right
+        }
+
+        // Draw Cap
+        for(int i = 0; i < 360; i += 360 / sides)
+        {
+          rlVertex3f(0, height, 0);
+          rlVertex3f(sinf(DEG2RAD * i) * radiusTop, height, cosf(DEG2RAD * i) * radiusTop);
+          rlVertex3f(sinf(DEG2RAD * (i + 360 / sides)) * radiusTop, height,
+                     cosf(DEG2RAD * (i + 360 / sides)) * radiusTop);
+        }
+      }
+      else
+      {
+        // Draw Cone
+        for(int i = 0; i < 360; i += 360 / sides)
+        {
+          rlVertex3f(0, height, 0);
+          rlVertex3f(sinf(DEG2RAD * i) * radiusBottom, 0, cosf(DEG2RAD * i) * radiusBottom);
+          rlVertex3f(sinf(DEG2RAD * (i + 360 / sides)) * radiusBottom, 0,
+                     cosf(DEG2RAD * (i + 360 / sides)) * radiusBottom);
+        }
+      }
+
+      // Draw Base
+      for(int i = 0; i < 360; i += 360 / sides)
+      {
+        rlVertex3f(0, 0, 0);
+        rlVertex3f(sinf(DEG2RAD * (i + 360 / sides)) * radiusBottom, 0,
+                   cosf(DEG2RAD * (i + 360 / sides)) * radiusBottom);
+        rlVertex3f(sinf(DEG2RAD * i) * radiusBottom, 0, cosf(DEG2RAD * i) * radiusBottom);
+      }
+    }
+    rlEnd();
+  }
+  rlPopMatrix();
+}
+
+void DrawArrow(Vector3 p0, Vector3 p1, float shaft_diam, float head_diam, float head_len, Color color)
+{
+  Vector3 normal = Vector3Subtract(p1, p0);
+  float height = Vector3Length(normal);
+  if(height == 0.0f)
+  {
+    return;
+  }
+  normal = Vector3Scale(normal, 1 / height);
+  if(head_len >= height)
+  {
+    head_len = height;
+  }
+  float shaft_len = height - head_len;
+  if(shaft_len != 0)
+  {
+    DrawCylinderEx(p0, normal, shaft_diam / 2, shaft_diam / 2, shaft_len, 32, color);
+  }
+  DrawCylinderEx(Vector3Add(p0, Vector3Scale(normal, shaft_len)), normal, 0, head_diam / 2, head_len, 32, color);
+}
+
+void DrawFrame(const sva::PTransformd & pose)
+{
+  auto px = translation(sva::PTransformd(Eigen::Vector3d{0.15, 0, 0}) * pose);
+  auto py = translation(sva::PTransformd(Eigen::Vector3d{0, 0.15, 0}) * pose);
+  auto pz = translation(sva::PTransformd(Eigen::Vector3d{0, 0, 0.15}) * pose);
+  auto p0 = translation(pose);
+  DrawArrow(p0, px, 0.15 * 0.15, 0.15 * 0.15, 0.5 * 0.15, RED);
+  DrawArrow(p0, py, 0.15 * 0.15, 0.15 * 0.15, 0.5 * 0.15, GREEN);
+  DrawArrow(p0, pz, 0.15 * 0.15, 0.15 * 0.15, 0.5 * 0.15, BLUE);
+}
