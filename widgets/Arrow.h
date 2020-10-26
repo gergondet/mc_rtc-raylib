@@ -26,9 +26,12 @@ struct Arrow : public Widget
     }
     start_ = start;
     end_ = end;
-    if(startMarker_)
+    if(startMarker_ && !startMarker_->active())
     {
       startMarker_->pose(start);
+    }
+    if(endMarker_ && !endMarker_->active())
+    {
       endMarker_->pose(end);
     }
     config_ = config;

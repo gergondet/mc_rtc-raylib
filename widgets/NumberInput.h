@@ -1,6 +1,6 @@
 #pragma once
 
-#include "SingleInput.h"
+#include "details/SingleInput.h"
 
 struct NumberInput : public SingleInput<double>
 {
