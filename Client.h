@@ -112,6 +112,8 @@ private:
 
   void rotation(const ElementId & id, const ElementId & requestId, bool ro, const sva::PTransformd & pos) override;
 
+  void transform(const ElementId & id, const ElementId & requestId, bool ro, const sva::PTransformd & pos) override;
+
   void robot(const ElementId & id,
              const std::vector<std::string> & params,
              const std::vector<std::vector<double>> & q) override;

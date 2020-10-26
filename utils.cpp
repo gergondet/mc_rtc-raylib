@@ -170,9 +170,9 @@ void DrawArrow(Vector3 p0, Vector3 p1, float shaft_diam, float head_diam, float 
   float shaft_len = height - head_len;
   if(shaft_len != 0)
   {
-    DrawCylinderEx(p0, normal, shaft_diam / 2, shaft_diam / 2, shaft_len, 32, color);
+    DrawCylinderEx(p0, normal, shaft_diam / 2, shaft_diam / 2, shaft_len, 8, color);
   }
-  DrawCylinderEx(Vector3Add(p0, Vector3Scale(normal, shaft_len)), normal, 0, head_diam / 2, head_len, 32, color);
+  DrawCylinderEx(Vector3Add(p0, Vector3Scale(normal, shaft_len)), normal, 0, head_diam / 2, head_len, 8, color);
 }
 
 void DrawFrame(const sva::PTransformd & pose)

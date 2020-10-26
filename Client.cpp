@@ -18,6 +18,7 @@
 #include "widgets/Rotation.h"
 #include "widgets/StringInput.h"
 #include "widgets/Trajectory.h"
+#include "widgets/Transform.h"
 
 void Client::update(SceneState & state)
 {
@@ -174,6 +175,11 @@ void Client::arrow(const ElementId & id,
 void Client::rotation(const ElementId & id, const ElementId & requestId, bool ro, const sva::PTransformd & pos)
 {
   widget<Rotation>(id, requestId).data(ro, pos);
+}
+
+void Client::transform(const ElementId & id, const ElementId & requestId, bool ro, const sva::PTransformd & pos)
+{
+  widget<TransformWidget>(id, requestId).data(ro, pos);
 }
 
 void Client::robot(const ElementId & id,
