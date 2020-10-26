@@ -19,6 +19,7 @@ enum class ControlAxis
   TRANSLATION = TX | TY | TZ,
   ROTATION = RX | RY | RZ,
   XYTHETA = TX | TY | RZ,
+  XYZTHETA = TX | TY | TZ | RZ,
   ALL = TRANSLATION | ROTATION
 };
 
