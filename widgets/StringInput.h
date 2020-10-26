@@ -4,7 +4,7 @@
 
 struct StringInput : public SingleInput<std::string>
 {
-  inline StringInput(const ElementId & id) : SingleInput<std::string>(id) {}
+  inline StringInput(Client & client, const ElementId & id) : SingleInput<std::string>(client, id) {}
 
   ~StringInput() override = default;
 

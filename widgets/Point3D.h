@@ -4,13 +4,13 @@
 
 struct Point3D : public Widget
 {
-  Point3D(const ElementId & id, const ElementId & requestId);
+  Point3D(Client & client, const ElementId & id, const ElementId & requestId);
 
   ~Point3D() override = default;
 
   void data(bool ro, const Eigen::Vector3d & pos, const mc_rtc::gui::PointConfig & config);
 
-  void update(Client & client, SceneState & state) override;
+  void update(SceneState & state) override;
 
   void draw3D(Camera camera) override;
 

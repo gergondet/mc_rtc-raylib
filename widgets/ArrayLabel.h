@@ -4,7 +4,7 @@
 
 struct ArrayLabel : public Widget
 {
-  inline ArrayLabel(const ElementId & id) : Widget(id) {}
+  inline ArrayLabel(Client & client, const ElementId & id) : Widget(client, id) {}
 
   ~ArrayLabel() override = default;
 

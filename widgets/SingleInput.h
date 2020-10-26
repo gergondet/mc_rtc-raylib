@@ -5,7 +5,7 @@
 template<typename DataT>
 struct SingleInput : public Widget
 {
-  inline SingleInput(const ElementId & id) : Widget(id) {}
+  inline SingleInput(Client & client, const ElementId & id) : Widget(client, id) {}
 
   ~SingleInput() override = default;
 
@@ -43,7 +43,8 @@ struct SingleInput : public Widget
         auto nData = dataFromBuffer();
         if(nData != data_)
         {
-          changed_ = true;
+          data_ = nData;
+          client.send_request(id, data_);
           data_ = nData;
         }
         else
@@ -54,18 +55,7 @@ struct SingleInput : public Widget
     }
   }
 
-  inline void update(Client & client, SceneState & state) override
-  {
-    if(changed_)
-    {
-      changed_ = false;
-      busy_ = false;
-      client.send_request(id, data_);
-    }
-  }
-
 protected:
   bool busy_ = false;
-  bool changed_ = false;
   DataT data_;
 };

@@ -4,7 +4,7 @@
 
 struct Checkbox : public Widget
 {
-  inline Checkbox(const ElementId & id) : Widget(id) {}
+  inline Checkbox(Client & client, const ElementId & id) : Widget(client, id) {}
 
   ~Checkbox() override = default;
 
@@ -17,20 +17,10 @@ struct Checkbox : public Widget
   {
     if(ImGui::Checkbox(label(id.name).c_str(), &data_))
     {
-      clicked_ = true;
-    }
-  }
-
-  inline void update(Client & client, SceneState & state) override
-  {
-    if(clicked_)
-    {
       client.send_request(id);
-      clicked_ = false;
     }
   }
 
 private:
   bool data_ = false;
-  bool clicked_ = false;
 };

@@ -72,15 +72,15 @@ private:
 
   void data_combo_input(const ElementId & id, const std::vector<std::string> & ref, const std::string & data) override;
 
-  void robot(const ElementId & id,
-             const std::vector<std::string> & params,
-             const std::vector<std::vector<double>> & q) override;
-
   void point3d(const ElementId & id,
                const ElementId & requestId,
                bool ro,
                const Eigen::Vector3d & pos,
                const mc_rtc::gui::PointConfig & config) override;
+
+  void robot(const ElementId & id,
+             const std::vector<std::string> & params,
+             const std::vector<std::vector<double>> & q) override;
 
   void stopped() override;
 
@@ -98,7 +98,7 @@ private:
         std::find_if(category.widgets.begin(), category.widgets.end(), [&](auto & w) { return w->id.name == id.name; });
     if(it == category.widgets.end())
     {
-      auto & w = category.widgets.emplace_back(std::make_unique<T>(id, std::forward<Args>(args)...));
+      auto & w = category.widgets.emplace_back(std::make_unique<T>(*this, id, std::forward<Args>(args)...));
       w->seen = true;
       return *dynamic_cast<T *>(w.get());
     }

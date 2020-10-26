@@ -26,7 +26,7 @@ struct Category
   std::vector<WidgetPtr> widgets;
   std::vector<CategoryPtr> categories;
 
-  void update(Client & client, SceneState & state);
+  void update(SceneState & state);
   void draw2D();
   void draw3D(Camera camera);
   void started();

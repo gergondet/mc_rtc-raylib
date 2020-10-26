@@ -22,18 +22,19 @@ using ElementId = mc_control::ElementId;
 /** A widget in the GUI */
 struct Widget
 {
-  inline Widget(const ElementId & id) : id(id) {}
+  inline Widget(Client & client, const ElementId & id) : client(client), id(id) {}
 
   virtual ~Widget() = default;
 
+  Client & client;
   ElementId id;
   bool seen = true;
 
-  /** Update based on user interaction */
-  virtual void update(Client &, SceneState &) {}
-
   /** Draw the 2D elements of the widget */
   virtual void draw2D() {}
+
+  /** Update 3D objects based on user interaction */
+  virtual void update(SceneState &) {}
 
   /** Draw the 3D elements of the widget */
   virtual void draw3D(Camera) {}

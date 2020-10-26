@@ -1,6 +1,9 @@
 #include "Point3D.h"
 
-Point3D::Point3D(const ElementId & id, const ElementId & requestId) : Widget(id), requestId_(requestId) {}
+Point3D::Point3D(Client & client, const ElementId & id, const ElementId & requestId)
+: Widget(client, id), requestId_(requestId)
+{
+}
 
 void Point3D::data(bool ro, const Eigen::Vector3d & pos, const mc_rtc::gui::PointConfig & config)
 {
@@ -18,7 +21,7 @@ void Point3D::data(bool ro, const Eigen::Vector3d & pos, const mc_rtc::gui::Poin
   }
 }
 
-void Point3D::update(Client & client, SceneState & state)
+void Point3D::update(SceneState & state)
 {
   if(marker_)
   {

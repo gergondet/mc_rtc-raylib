@@ -4,7 +4,7 @@
 
 struct Button : public Widget
 {
-  inline Button(const ElementId & id) : Widget(id) {}
+  inline Button(Client & client, const ElementId & id) : Widget(client, id) {}
 
   ~Button() override = default;
 
@@ -12,19 +12,7 @@ struct Button : public Widget
   {
     if(ImGui::Button(label(id.name).c_str()))
     {
-      clicked_ = true;
-    }
-  }
-
-  inline void update(Client & client, SceneState & state) override
-  {
-    if(clicked_)
-    {
       client.send_request(id);
-      clicked_ = false;
     }
   }
-
-private:
-  bool clicked_ = false;
 };

@@ -4,7 +4,7 @@
 
 struct NumberSlider : public Widget
 {
-  inline NumberSlider(const ElementId & id) : Widget(id) {}
+  inline NumberSlider(Client & client, const ElementId & id) : Widget(client, id) {}
 
   ~NumberSlider() override = default;
 
@@ -19,21 +19,11 @@ struct NumberSlider : public Widget
   {
     if(ImGui::SliderFloat(id.name.c_str(), &data_, min_, max_))
     {
-      changed_ = true;
-    }
-  }
-
-  inline void update(Client & client, SceneState & state) override
-  {
-    if(changed_)
-    {
       client.send_request(id, data_);
-      changed_ = false;
     }
   }
 
 private:
-  bool changed_ = false;
   float data_;
   float min_;
   float max_;

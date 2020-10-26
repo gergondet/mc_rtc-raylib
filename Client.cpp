@@ -16,7 +16,7 @@
 
 void Client::update(SceneState & state)
 {
-  root_.update(*this, state);
+  root_.update(state);
   run(buffer_, t_last_);
 }
 

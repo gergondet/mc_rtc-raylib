@@ -4,7 +4,7 @@
 
 struct IntegerInput : public SingleInput<int>
 {
-  inline IntegerInput(const ElementId & id) : SingleInput<int>(id) {}
+  inline IntegerInput(Client & client, const ElementId & id) : SingleInput<int>(client, id) {}
 
   ~IntegerInput() override = default;
 

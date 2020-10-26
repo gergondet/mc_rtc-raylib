@@ -4,7 +4,7 @@
 
 struct ComboInput : public Widget
 {
-  inline ComboInput(const ElementId & id) : Widget(id) {}
+  inline ComboInput(Client & client, const ElementId & id) : Widget(client, id) {}
 
   ~ComboInput() override = default;
 
@@ -37,7 +37,7 @@ struct ComboInput : public Widget
           if(i != idx)
           {
             data_ = values_[i];
-            changed_ = true;
+            client.send_request(id, data_);
           }
         }
         if(idx == i)
@@ -49,17 +49,7 @@ struct ComboInput : public Widget
     }
   }
 
-  inline void update(Client & client, SceneState & state) override
-  {
-    if(changed_)
-    {
-      client.send_request(id, data_);
-      changed_ = false;
-    }
-  }
-
 protected:
   std::vector<std::string> values_;
   std::string data_;
-  bool changed_ = false;
 };

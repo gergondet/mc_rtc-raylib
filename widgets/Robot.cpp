@@ -2,7 +2,7 @@
 
 #include <mc_rbdyn/RobotLoader.h>
 
-Robot::Robot(const ElementId & id, const std::vector<std::string> & p) : Widget(id)
+Robot::Robot(Client & client, const ElementId & id, const std::vector<std::string> & p) : Widget(client, id)
 {
   mc_rbdyn::RobotModulePtr rm{nullptr};
   if(p.size() == 1)

@@ -4,7 +4,7 @@
 
 struct ArrayInput : public Widget
 {
-  inline ArrayInput(const ElementId & id) : Widget(id) {}
+  inline ArrayInput(Client & client, const ElementId & id) : Widget(client, id) {}
 
   ~ArrayInput() override = default;
 
@@ -43,8 +43,12 @@ struct ArrayInput : public Widget
     {
       if(busy_)
       {
-        changed_ = buffer_ != data_;
-        busy_ = changed_;
+        if(buffer_ != data_)
+        {
+          data_ = buffer_;
+          client.send_request(id, data_);
+        }
+        busy_ = false;
       }
       else
       {
@@ -55,20 +59,8 @@ struct ArrayInput : public Widget
     ImGui::Columns(1);
   }
 
-  inline void update(Client & client, SceneState & state) override
-  {
-    if(changed_)
-    {
-      data_ = buffer_;
-      client.send_request(id, data_);
-      changed_ = false;
-      busy_ = false;
-    }
-  }
-
 private:
   bool busy_ = false;
-  bool changed_ = false;
   std::vector<std::string> labels_;
   Eigen::VectorXd data_;
   Eigen::VectorXd buffer_;

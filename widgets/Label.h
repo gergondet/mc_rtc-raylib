@@ -4,7 +4,7 @@
 
 struct Label : public Widget
 {
-  inline Label(const ElementId & id) : Widget(id) {}
+  inline Label(Client & client, const ElementId & id) : Widget(client, id) {}
 
   ~Label() override = default;
 

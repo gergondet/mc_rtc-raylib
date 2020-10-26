@@ -11,7 +11,7 @@ struct DataComboInput : public ComboInput
   inline void data(const std::vector<std::string> & values, const std::string & data)
   {
     data_ = data;
-    mc_rtc::Configuration out = static_;
+    mc_rtc::Configuration out = client.data();
     if(values.size() > 1)
     {
       for(size_t i = 0; i < values.size() - 1; ++i)
@@ -25,13 +25,4 @@ struct DataComboInput : public ComboInput
     }
     values_ = out(values.back(), std::vector<std::string>{});
   }
-
-  inline void update(Client & client, SceneState & state) override
-  {
-    static_ = client.data();
-    ComboInput::update(client, state);
-  }
-
-private:
-  mc_rtc::Configuration static_;
 };

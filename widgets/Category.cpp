@@ -1,14 +1,14 @@
 #include "Category.h"
 
-void Category::update(Client & client, SceneState & state)
+void Category::update(SceneState & state)
 {
   for(auto & w : widgets)
   {
-    w->update(client, state);
+    w->update(state);
   }
   for(auto & cat : categories)
   {
-    cat->update(client, state);
+    cat->update(state);
   }
 }
 
