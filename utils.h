@@ -3,6 +3,8 @@
 #include <SpaceVecAlg/Conversions.h>
 #include <SpaceVecAlg/SpaceVecAlg>
 
+#include <mc_rtc/gui/types.h>
+
 #include "raylib.h"
 #include "raymath.h"
 
@@ -12,6 +14,17 @@ Matrix convert(const sva::PTransformd & pt);
 inline Matrix convert(const Eigen::Matrix3d & m)
 {
   return convert(sva::PTransformd{m});
+}
+
+inline Vector3 convert(const Eigen::Vector3d & v)
+{
+  return {static_cast<float>(v.x()), static_cast<float>(v.y()), static_cast<float>(v.z())};
+}
+
+inline Color convert(const mc_rtc::gui::Color & color)
+{
+  auto f = [](double d) { return static_cast<float>(d); };
+  return ColorFromNormalized({f(color.r), f(color.g), f(color.b), f(color.a)});
 }
 
 // Extract the translation part of a PTransform only

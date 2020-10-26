@@ -16,5 +16,7 @@ struct Point3D : public Widget
 
 private:
   ElementId requestId_;
+  Vector3 pos_;
+  mc_rtc::gui::PointConfig config_;
   std::unique_ptr<InteractiveMarker> marker_;
 };
