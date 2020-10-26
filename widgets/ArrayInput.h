@@ -29,8 +29,9 @@ struct ArrayInput : public Widget
     ImGui::NextColumn();
     if(labels_.size())
     {
-      for(const auto & l : labels_)
+      for(size_t i = 0; i < std::min<size_t>(labels_.size(), data_.size()); ++i)
       {
+        const auto & l = labels_[i];
         ImGui::Text("%s", l.c_str());
       }
       ImGui::NextColumn();
