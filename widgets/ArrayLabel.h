@@ -26,9 +26,25 @@ struct ArrayLabel : public Widget
         ImGui::Text("%s", labels_[i].c_str());
       }
       ImGui::NextColumn();
+      ImVec2 min;
+      ImVec2 max;
       for(int i = 0; i < data_.size(); ++i)
       {
         ImGui::Text("%.4f", data_(i));
+        if(i == 0)
+        {
+          min = ImGui::GetItemRectMin();
+        }
+        if(i == data_.size() - 1)
+        {
+          max = ImGui::GetItemRectMax();
+        }
+      }
+      if(ImGui::IsMouseHoveringRect(min, max))
+      {
+        ImGui::BeginTooltip();
+        ImGui::Text("%s", fmt::format("{:0.4f}", data_.norm()).c_str());
+        ImGui::EndTooltip();
       }
       ImGui::NextColumn();
       ImGui::Columns(1);
@@ -48,6 +64,12 @@ struct ArrayLabel : public Widget
       else
       {
         ImGui::LabelText(fmt::format("{}", data_).c_str(), "%s", id.name.c_str());
+        if(ImGui::IsItemHovered())
+        {
+          ImGui::BeginTooltip();
+          ImGui::Text("%s", fmt::format("{:0.4f}", data_.norm()).c_str());
+          ImGui::EndTooltip();
+        }
       }
     }
   }
