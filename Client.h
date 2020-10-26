@@ -114,6 +114,12 @@ private:
 
   void transform(const ElementId & id, const ElementId & requestId, bool ro, const sva::PTransformd & pos) override;
 
+  void xytheta(const ElementId & id,
+               const ElementId & requestId,
+               bool ro,
+               const Eigen::Vector3d & xytheta,
+               double altitude) override;
+
   void robot(const ElementId & id,
              const std::vector<std::string> & params,
              const std::vector<std::vector<double>> & q) override;

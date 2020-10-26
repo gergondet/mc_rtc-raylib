@@ -51,10 +51,13 @@ struct TransformBase : public Widget
       }
       else if constexpr(ctl == ControlAxis::XYTHETA || ctl == ControlAxis::XYZTHETA)
       {
-        Eigen::Vector4d data;
+        Eigen::VectorXd data = Eigen::VectorXd::Zero(4);
         const auto & t = pos_.translation();
         auto yaw = mc_rbdyn::rpyFromMat(pos_.rotation()).z();
-        data << t.x(), t.y(), yaw, t.z();
+        data(0) = t.x();
+        data(1) = t.y();
+        data(2) = yaw;
+        data(3) = t.z();
         client.send_request(requestId_, data);
       }
     }

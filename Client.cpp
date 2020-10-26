@@ -19,6 +19,7 @@
 #include "widgets/StringInput.h"
 #include "widgets/Trajectory.h"
 #include "widgets/Transform.h"
+#include "widgets/XYTheta.h"
 
 void Client::update(SceneState & state)
 {
@@ -180,6 +181,15 @@ void Client::rotation(const ElementId & id, const ElementId & requestId, bool ro
 void Client::transform(const ElementId & id, const ElementId & requestId, bool ro, const sva::PTransformd & pos)
 {
   widget<TransformWidget>(id, requestId).data(ro, pos);
+}
+
+void Client::xytheta(const ElementId & id,
+                     const ElementId & requestId,
+                     bool ro,
+                     const Eigen::Vector3d & xytheta,
+                     double altitude)
+{
+  widget<XYTheta>(id, requestId).data(ro, xytheta, altitude);
 }
 
 void Client::robot(const ElementId & id,
