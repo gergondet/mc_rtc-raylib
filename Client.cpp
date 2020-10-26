@@ -15,6 +15,7 @@
 #include "widgets/Point3D.h"
 #include "widgets/Polygon.h"
 #include "widgets/Robot.h"
+#include "widgets/Rotation.h"
 #include "widgets/StringInput.h"
 #include "widgets/Trajectory.h"
 
@@ -168,6 +169,11 @@ void Client::arrow(const ElementId & id,
                    bool ro)
 {
   widget<Arrow>(id, requestId).data(start, end, config, ro);
+}
+
+void Client::rotation(const ElementId & id, const ElementId & requestId, bool ro, const sva::PTransformd & pos)
+{
+  widget<Rotation>(id, requestId).data(ro, pos);
 }
 
 void Client::robot(const ElementId & id,
