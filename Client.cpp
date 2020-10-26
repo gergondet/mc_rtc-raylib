@@ -8,6 +8,7 @@
 #include "widgets/ComboInput.h"
 #include "widgets/DataComboInput.h"
 #include "widgets/Force.h"
+#include "widgets/Form.h"
 #include "widgets/IntegerInput.h"
 #include "widgets/Label.h"
 #include "widgets/NumberInput.h"
@@ -206,6 +207,61 @@ void Client::table_row(const ElementId & id, const std::vector<std::string> & da
 void Client::table_end(const ElementId & id)
 {
   widget<Table>(id).end();
+}
+
+void Client::form(const ElementId & id)
+{
+  widget<Form>(id);
+}
+
+void Client::form_checkbox(const ElementId & id, const std::string & name, bool required, bool default_)
+{
+  widget<Form>(id).widget<form::Checkbox>(name, required, default_);
+}
+
+void Client::form_integer_input(const ElementId & id, const std::string & name, bool required, int default_)
+{
+  widget<Form>(id).widget<form::IntegerInput>(name, required, default_);
+}
+
+void Client::form_number_input(const ElementId & id, const std::string & name, bool required, double default_)
+{
+  widget<Form>(id).widget<form::NumberInput>(name, required, default_);
+}
+
+void Client::form_string_input(const ElementId & id,
+                               const std::string & name,
+                               bool required,
+                               const std::string & default_)
+{
+  widget<Form>(id).widget<form::StringInput>(name, required, default_);
+}
+
+void Client::form_array_input(const ElementId & id,
+                              const std::string & name,
+                              bool required,
+                              const Eigen::VectorXd & default_,
+                              bool fixed_size)
+{
+  widget<Form>(id).widget<form::ArrayInput>(name, required, default_, fixed_size);
+}
+
+void Client::form_combo_input(const ElementId & id,
+                              const std::string & name,
+                              bool required,
+                              const std::vector<std::string> & values,
+                              bool send_index)
+{
+  widget<Form>(id).widget<form::ComboInput>(name, required, values, send_index);
+}
+
+void Client::form_data_combo_input(const ElementId & id,
+                                   const std::string & name,
+                                   bool required,
+                                   const std::vector<std::string> & ref,
+                                   bool send_index)
+{
+  widget<Form>(id).widget<form::DataComboInput>(name, required, ref, send_index);
 }
 
 void Client::robot(const ElementId & id,

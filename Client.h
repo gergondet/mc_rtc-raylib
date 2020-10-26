@@ -130,6 +130,37 @@ private:
              const std::vector<std::string> & params,
              const std::vector<std::vector<double>> & q) override;
 
+  void form(const ElementId & id) override;
+
+  void form_checkbox(const ElementId & formId, const std::string & name, bool required, bool default_) override;
+
+  void form_integer_input(const ElementId & formId, const std::string & name, bool required, int default_) override;
+
+  void form_number_input(const ElementId & formId, const std::string & name, bool required, double default_) override;
+
+  void form_string_input(const ElementId & formId,
+                         const std::string & name,
+                         bool required,
+                         const std::string & default_) override;
+
+  void form_array_input(const ElementId & formId,
+                        const std::string & name,
+                        bool required,
+                        const Eigen::VectorXd & default_,
+                        bool fixed_size) override;
+
+  void form_combo_input(const ElementId & formId,
+                        const std::string & name,
+                        bool required,
+                        const std::vector<std::string> & values,
+                        bool send_index) override;
+
+  void form_data_combo_input(const ElementId & formId,
+                             const std::string & name,
+                             bool required,
+                             const std::vector<std::string> & ref,
+                             bool send_index) override;
+
   void stopped() override;
 
   Category root_;
