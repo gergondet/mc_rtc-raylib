@@ -120,6 +120,12 @@ private:
                const Eigen::Vector3d & xytheta,
                double altitude) override;
 
+  void table_start(const ElementId & id, const std::vector<std::string> & header) override;
+
+  void table_row(const ElementId & id, const std::vector<std::string> & data) override;
+
+  void table_end(const ElementId & id) override;
+
   void robot(const ElementId & id,
              const std::vector<std::string> & params,
              const std::vector<std::vector<double>> & q) override;

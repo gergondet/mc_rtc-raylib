@@ -17,6 +17,7 @@
 #include "widgets/Robot.h"
 #include "widgets/Rotation.h"
 #include "widgets/StringInput.h"
+#include "widgets/Table.h"
 #include "widgets/Trajectory.h"
 #include "widgets/Transform.h"
 #include "widgets/XYTheta.h"
@@ -190,6 +191,21 @@ void Client::xytheta(const ElementId & id,
                      double altitude)
 {
   widget<XYTheta>(id, requestId).data(ro, xytheta, altitude);
+}
+
+void Client::table_start(const ElementId & id, const std::vector<std::string> & header)
+{
+  widget<Table>(id).start(header);
+}
+
+void Client::table_row(const ElementId & id, const std::vector<std::string> & data)
+{
+  widget<Table>(id).row(data);
+}
+
+void Client::table_end(const ElementId & id)
+{
+  widget<Table>(id).end();
 }
 
 void Client::robot(const ElementId & id,
