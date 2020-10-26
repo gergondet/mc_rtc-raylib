@@ -6,6 +6,8 @@
 #include "raylib.h"
 #include "raymath.h"
 
+#include <memory>
+
 enum class ControlAxis
 {
   TX = (1u << 0),
@@ -86,3 +88,5 @@ private:
   };
   std::vector<MarkerOrientationControl> oriControls_;
 };
+
+using InteractiveMarkerPtr = std::unique_ptr<InteractiveMarker>;

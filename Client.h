@@ -96,6 +96,20 @@ private:
                const std::vector<std::vector<Eigen::Vector3d>> & points,
                const mc_rtc::gui::Color & color) override;
 
+  void force(const ElementId & id,
+             const ElementId & requestId,
+             const sva::ForceVecd & force,
+             const sva::PTransformd & pos,
+             const mc_rtc::gui::ForceConfig & forceConfig,
+             bool /* ro */) override;
+
+  void arrow(const ElementId & id,
+             const ElementId & requestId,
+             const Eigen::Vector3d & start,
+             const Eigen::Vector3d & end,
+             const mc_rtc::gui::ArrowConfig & config,
+             bool ro) override;
+
   void robot(const ElementId & id,
              const std::vector<std::string> & params,
              const std::vector<std::vector<double>> & q) override;

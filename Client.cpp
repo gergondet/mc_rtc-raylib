@@ -2,10 +2,12 @@
 
 #include "widgets/ArrayInput.h"
 #include "widgets/ArrayLabel.h"
+#include "widgets/Arrow.h"
 #include "widgets/Button.h"
 #include "widgets/Checkbox.h"
 #include "widgets/ComboInput.h"
 #include "widgets/DataComboInput.h"
+#include "widgets/Force.h"
 #include "widgets/IntegerInput.h"
 #include "widgets/Label.h"
 #include "widgets/NumberInput.h"
@@ -146,6 +148,26 @@ void Client::polygon(const ElementId & id,
                      const mc_rtc::gui::Color & color)
 {
   widget<Polygon>(id).data(points, color);
+}
+
+void Client::force(const ElementId & id,
+                   const ElementId & requestId,
+                   const sva::ForceVecd & force,
+                   const sva::PTransformd & pos,
+                   const mc_rtc::gui::ForceConfig & forceConfig,
+                   bool /* ro */)
+{
+  widget<Force>(id, requestId).data(force, pos, forceConfig);
+}
+
+void Client::arrow(const ElementId & id,
+                   const ElementId & requestId,
+                   const Eigen::Vector3d & start,
+                   const Eigen::Vector3d & end,
+                   const mc_rtc::gui::ArrowConfig & config,
+                   bool ro)
+{
+  widget<Arrow>(id, requestId).data(start, end, config, ro);
 }
 
 void Client::robot(const ElementId & id,
