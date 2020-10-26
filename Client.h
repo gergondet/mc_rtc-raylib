@@ -78,6 +78,20 @@ private:
                const Eigen::Vector3d & pos,
                const mc_rtc::gui::PointConfig & config) override;
 
+  void trajectory(const ElementId & id,
+                  const std::vector<Eigen::Vector3d> & points,
+                  const mc_rtc::gui::LineConfig & config) override;
+
+  void trajectory(const ElementId & id,
+                  const std::vector<sva::PTransformd> & points,
+                  const mc_rtc::gui::LineConfig & config) override;
+
+  void trajectory(const ElementId & id, const Eigen::Vector3d & point, const mc_rtc::gui::LineConfig & config) override;
+
+  void trajectory(const ElementId & id,
+                  const sva::PTransformd & point,
+                  const mc_rtc::gui::LineConfig & config) override;
+
   void robot(const ElementId & id,
              const std::vector<std::string> & params,
              const std::vector<std::vector<double>> & q) override;

@@ -13,6 +13,7 @@
 #include "widgets/Point3D.h"
 #include "widgets/Robot.h"
 #include "widgets/StringInput.h"
+#include "widgets/Trajectory.h"
 
 void Client::update(SceneState & state)
 {
@@ -113,6 +114,30 @@ void Client::point3d(const ElementId & id,
                      const mc_rtc::gui::PointConfig & config)
 {
   widget<Point3D>(id, requestId).data(ro, pos, config);
+}
+
+void Client::trajectory(const ElementId & id,
+                        const std::vector<Eigen::Vector3d> & points,
+                        const mc_rtc::gui::LineConfig & config)
+{
+  widget<Trajectory<Eigen::Vector3d>>(id).data(points, config);
+}
+
+void Client::trajectory(const ElementId & id,
+                        const std::vector<sva::PTransformd> & points,
+                        const mc_rtc::gui::LineConfig & config)
+{
+  widget<Trajectory<sva::PTransformd>>(id).data(points, config);
+}
+
+void Client::trajectory(const ElementId & id, const Eigen::Vector3d & point, const mc_rtc::gui::LineConfig & config)
+{
+  widget<Trajectory<Eigen::Vector3d>>(id).data(point, config);
+}
+
+void Client::trajectory(const ElementId & id, const sva::PTransformd & point, const mc_rtc::gui::LineConfig & config)
+{
+  widget<Trajectory<sva::PTransformd>>(id).data(point, config);
 }
 
 void Client::robot(const ElementId & id,
