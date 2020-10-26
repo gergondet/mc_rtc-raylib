@@ -11,6 +11,7 @@
 #include "widgets/NumberInput.h"
 #include "widgets/NumberSlider.h"
 #include "widgets/Point3D.h"
+#include "widgets/Polygon.h"
 #include "widgets/Robot.h"
 #include "widgets/StringInput.h"
 #include "widgets/Trajectory.h"
@@ -138,6 +139,13 @@ void Client::trajectory(const ElementId & id, const Eigen::Vector3d & point, con
 void Client::trajectory(const ElementId & id, const sva::PTransformd & point, const mc_rtc::gui::LineConfig & config)
 {
   widget<Trajectory<sva::PTransformd>>(id).data(point, config);
+}
+
+void Client::polygon(const ElementId & id,
+                     const std::vector<std::vector<Eigen::Vector3d>> & points,
+                     const mc_rtc::gui::Color & color)
+{
+  widget<Polygon>(id).data(points, color);
 }
 
 void Client::robot(const ElementId & id,

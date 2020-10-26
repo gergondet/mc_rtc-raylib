@@ -92,6 +92,10 @@ private:
                   const sva::PTransformd & point,
                   const mc_rtc::gui::LineConfig & config) override;
 
+  void polygon(const ElementId & id,
+               const std::vector<std::vector<Eigen::Vector3d>> & points,
+               const mc_rtc::gui::Color & color) override;
+
   void robot(const ElementId & id,
              const std::vector<std::string> & params,
              const std::vector<std::vector<double>> & q) override;
