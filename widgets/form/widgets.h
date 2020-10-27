@@ -3,6 +3,7 @@
 #include "../Widget.h"
 
 #include <memory>
+#include <optional>
 
 namespace form
 {
@@ -37,8 +38,10 @@ protected:
 template<typename DataT>
 struct SimpleInput : public Widget
 {
+  SimpleInput(const ::Widget & parent, const std::string & name) : Widget(parent, name) {}
+
   SimpleInput(const ::Widget & parent, const std::string & name, const DataT & value)
-  : Widget(parent, name), value_(value)
+  : Widget(parent, name), value_(value), temp_(value)
   {
   }
 
@@ -46,35 +49,37 @@ struct SimpleInput : public Widget
 
   bool ready() override
   {
-    if constexpr(std::is_same_v<DataT, std::string>)
+    if constexpr(std::is_same_v<DataT, std::string> || std::is_same_v<DataT, Eigen::VectorXd>)
     {
-      return value_.size() != 0;
+      return value_.has_value() && value_.value().size() != 0;
     }
     else
     {
-      return true;
+      return value_.has_value();
     }
   }
 
   void collect(mc_rtc::Configuration & out) override
   {
-    out.add(name, value_);
+    assert(ready());
+    out.add(name, value_.value());
   }
 
   std::string value() override
   {
     if constexpr(std::is_same_v<DataT, std::string>)
     {
-      return value_;
+      return value_.has_value() ? value_.value() : "";
     }
     else
     {
-      return fmt::format("{}", value_);
+      return fmt::format("{}", value_.has_value() ? value_.value() : temp_);
     }
   }
 
 protected:
-  DataT value_;
+  std::optional<DataT> value_;
+  DataT temp_;
 };
 
 struct Checkbox : public SimpleInput<bool>
@@ -83,7 +88,10 @@ struct Checkbox : public SimpleInput<bool>
 
   inline void draw() override
   {
-    ImGui::Checkbox(label(name).c_str(), &value_);
+    if(ImGui::Checkbox(label(name).c_str(), &temp_))
+    {
+      value_ = temp_;
+    }
   }
 };
 
@@ -93,7 +101,10 @@ struct IntegerInput : public SimpleInput<int>
 
   inline void draw() override
   {
-    ImGui::InputInt(label(name).c_str(), &value_, 0, 0);
+    if(ImGui::InputInt(label(name).c_str(), &temp_, 0, 0))
+    {
+      value_ = temp_;
+    }
   }
 };
 
@@ -103,7 +114,10 @@ struct NumberInput : public SimpleInput<double>
 
   inline void draw() override
   {
-    ImGui::InputDouble(label(name).c_str(), &value_);
+    if(ImGui::InputDouble(label(name).c_str(), &temp_))
+    {
+      value_ = temp_;
+    }
   }
 };
 
@@ -113,11 +127,12 @@ struct StringInput : public SimpleInput<std::string>
 
   inline void draw() override
   {
-    if(buffer_.size() < std::max<size_t>(value_.size() + 1, 256))
+    const auto & value = value_.has_value() ? value_.value() : "";
+    if(buffer_.size() < std::max<size_t>(value.size() + 1, 256))
     {
-      buffer_.resize(std::max<size_t>(value_.size() + 1, 256));
-      std::memcpy(buffer_.data(), value_.data(), value_.size());
-      buffer_[value_.size()] = '0';
+      buffer_.resize(std::max<size_t>(value.size() + 1, 256));
+      std::memcpy(buffer_.data(), value.data(), value.size());
+      buffer_[value.size()] = '0';
     }
     if(ImGui::InputText(label(name).c_str(), buffer_.data(), buffer_.size()))
     {
@@ -150,13 +165,14 @@ struct ComboInput : public SimpleInput<std::string>
 
   inline void collect(mc_rtc::Configuration & out) override
   {
+    assert(ready());
     if(send_index_)
     {
       out.add(name, idx_);
     }
     else
     {
-      out.add(name, value_);
+      out.add(name, value_.value());
     }
   }
 

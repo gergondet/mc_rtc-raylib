@@ -16,24 +16,28 @@ ArrayInput::ArrayInput(const ::Widget & parent,
 void ArrayInput::draw()
 {
   ImGui::Columns(2);
-  for(size_t i = 0; i < value_.size(); ++i)
+  for(size_t i = 0; i < temp_.size(); ++i)
   {
-    ImGui::InputDouble(label(fmt::format("{}", i)).c_str(), &value_(i));
+    if(ImGui::InputDouble(label(fmt::format("{}", i)).c_str(), &temp_(i)))
+    {
+      value_ = temp_;
+    }
     if(!fixed_)
     {
       ImGui::SameLine();
       if(ImGui::Button(label("-", i).c_str()))
       {
-        Eigen::VectorXd nValue = Eigen::VectorXd::Zero(value_.size() - 1);
+        Eigen::VectorXd nValue = Eigen::VectorXd::Zero(temp_.size() - 1);
         if(i != 0)
         {
-          nValue.head(i) = value_.head(i);
+          nValue.head(i) = temp_.head(i);
         }
         if(nValue.size() - i)
         {
-          nValue.tail(nValue.size() - i) = value_.tail(value_.size() - 1 - i);
+          nValue.tail(nValue.size() - i) = temp_.tail(temp_.size() - 1 - i);
         }
-        value_ = nValue;
+        temp_ = nValue;
+        value_ = temp_;
       }
     }
   }
@@ -41,9 +45,10 @@ void ArrayInput::draw()
   {
     if(ImGui::Button(label("+").c_str()))
     {
-      Eigen::VectorXd nValue = Eigen::VectorXd::Zero(value_.size() + 1);
-      nValue.head(value_.size()) = value_;
-      value_ = nValue;
+      Eigen::VectorXd nValue = Eigen::VectorXd::Zero(temp_.size() + 1);
+      nValue.head(temp_.size()) = temp_;
+      temp_ = nValue;
+      value_ = temp_;
     }
   }
   ImGui::NextColumn();
@@ -135,9 +140,9 @@ void DataComboInput::draw()
   if(idx_ >= values_.size() || values_[idx_] != value_)
   {
     idx_ = values_.size();
-    value_ = "";
+    value_ = std::nullopt;
   }
-  const char * label_ = label.size() ? label.c_str() : value_.c_str();
+  const char * label_ = label.size() ? label.c_str() : value_.has_value() ? value_.value().c_str() : "";
   ComboInput::draw(label_);
 }
 
