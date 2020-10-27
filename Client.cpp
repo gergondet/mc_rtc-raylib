@@ -17,6 +17,7 @@
 #include "widgets/Polygon.h"
 #include "widgets/Robot.h"
 #include "widgets/Rotation.h"
+#include "widgets/Schema.h"
 #include "widgets/StringInput.h"
 #include "widgets/Table.h"
 #include "widgets/Trajectory.h"
@@ -269,6 +270,11 @@ void Client::robot(const ElementId & id,
                    const std::vector<std::vector<double>> & q)
 {
   widget<Robot>(id, params).data(q);
+}
+
+void Client::schema(const ElementId & id, const std::string & schema)
+{
+  widget<Schema>(id).data(schema);
 }
 
 auto Client::getCategory(const std::vector<std::string> & category) -> Category &

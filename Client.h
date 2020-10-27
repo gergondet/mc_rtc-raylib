@@ -130,6 +130,8 @@ private:
              const std::vector<std::string> & params,
              const std::vector<std::vector<double>> & q) override;
 
+  void schema(const ElementId & id, const std::string & schema) override;
+
   void form(const ElementId & id) override;
 
   void form_checkbox(const ElementId & formId, const std::string & name, bool required, bool default_) override;
