@@ -26,10 +26,10 @@ int main(void)
 
   // Define the camera to look into our 3d world
   OrbitCamera camera;
-  camera.position = (Vector3){3.0f, 3.0f, 3.0f}; // Camera position
-  camera.target = (Vector3){0.0f, 0.0f, 0.0f}; // Camera looking at point
+  camera.position = (Vector3){2.5f, -1.5f, 1.3f}; // Camera position
+  camera.target = (Vector3){-0.15f, -0.4f, 0.75f}; // Camera looking at point
   camera.up = (Vector3){0.0f, 0.0f, 1.0f}; // Camera up vector (rotation towards target)
-  camera.fovy = 45.0f; // Camera field-of-view Y
+  camera.fovy = 60.0f; // Camera field-of-view Y
   camera.type = CAMERA_PERSPECTIVE; // Camera mode type
 
   Client client("ipc:///tmp/mc_rtc_pub.ipc", "ipc:///tmp/mc_rtc_rep.ipc", 1);
