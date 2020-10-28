@@ -10,7 +10,14 @@ std::optional<T> get_default(const mc_rtc::Configuration & conf)
   {
     return std::nullopt;
   }
-  return conf("default", T{});
+  try
+  {
+    return conf("default");
+  }
+  catch(mc_rtc::Configuration::Exception & exc)
+  {
+    return std::nullopt;
+  }
 }
 
 } // namespace

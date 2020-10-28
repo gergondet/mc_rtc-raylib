@@ -99,7 +99,9 @@ struct SchemaForm
 
   bool draw(const char * label)
   {
+    ImGui::Indent();
     object_->draw(false);
+    ImGui::Unindent();
     return ImGui::Button(label);
   }
 

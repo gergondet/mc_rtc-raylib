@@ -70,6 +70,17 @@ struct SimpleInput : public Widget
     {
       temp_ = value.value();
     }
+    else
+    {
+      if constexpr(std::is_arithmetic_v<DataT>)
+      {
+        temp_ = 0;
+      }
+      else
+      {
+        temp_ = {};
+      }
+    }
   }
 
   ~SimpleInput() override = default;
