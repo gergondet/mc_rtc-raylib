@@ -40,7 +40,14 @@ void resolveRef(const bfs::path & path,
       if(k == "$ref")
       {
         auto ref = loadFn(bfs::canonical(path.parent_path() / removeFakeDir(conf(k)).c_str()));
-        conf.load(ref);
+        auto refKeys = ref.keys();
+        for(const auto & rk : refKeys)
+        {
+          if(!conf.has(rk))
+          {
+            conf.add(rk, ref(rk));
+          }
+        }
         conf.remove("$ref");
       }
       else
