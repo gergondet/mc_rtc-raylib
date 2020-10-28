@@ -63,10 +63,17 @@ struct SimpleInput : public Widget
 {
   SimpleInput(const ::Widget & parent, const std::string & name) : Widget(parent, name) {}
 
-  SimpleInput(const ::Widget & parent, const std::string & name, const std::optional<DataT> & value)
+  SimpleInput(const ::Widget & parent,
+              const std::string & name,
+              const std::optional<DataT> & value,
+              const std::optional<DataT> & temp = std::nullopt)
   : Widget(parent, name), value_(value)
   {
-    if(value_.has_value())
+    if(temp.has_value())
+    {
+      temp_ = temp.value();
+    }
+    else if(value_.has_value())
     {
       temp_ = value.value();
     }
@@ -99,8 +106,14 @@ struct SimpleInput : public Widget
 
   void collect(mc_rtc::Configuration & out) override
   {
-    assert(ready());
-    out.add(name(), value_.value());
+    if(ready())
+    {
+      out.add(name(), value_.value());
+    }
+    else
+    {
+      out.add(name(), temp_);
+    }
   }
 
   std::string value() override

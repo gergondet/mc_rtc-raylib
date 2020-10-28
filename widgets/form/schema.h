@@ -5,6 +5,30 @@
 namespace form
 {
 
+struct ArrayForm : public Widget
+{
+  ArrayForm(const ::Widget & parent, const std::string & name, const mc_rtc::Configuration & schema);
+
+  bool ready() override;
+
+  void draw() override;
+
+  void collect(mc_rtc::Configuration & out) override;
+
+protected:
+  mc_rtc::Configuration schema_;
+  size_t minSize_;
+  size_t maxSize_;
+  bool isArrayOfObject_ = false;
+  bool isArrayOfArray_ = false;
+  std::vector<WidgetPtr> widgets_;
+  size_t id_ = 0;
+
+  void addWidget();
+
+  void removeWidget(size_t idx);
+};
+
 struct ObjectForm : public Widget
 {
   ObjectForm(const ::Widget & parent,

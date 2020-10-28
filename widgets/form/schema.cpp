@@ -16,8 +16,40 @@ std::optional<T> get_default(const mc_rtc::Configuration & conf)
   }
   catch(mc_rtc::Configuration::Exception & exc)
   {
+    exc.silence();
     return std::nullopt;
   }
+}
+
+size_t span(size_t minS, size_t maxS)
+{
+  if(minS == maxS)
+  {
+    if(minS == 9)
+    {
+      return 3;
+    }
+    if(minS == 36)
+    {
+      return 6;
+    }
+  }
+  return 1;
+}
+
+template<typename T>
+T default_(size_t id, size_t minS, size_t maxS)
+{
+  auto span_ = span(minS, maxS);
+  if(span_ == 1)
+  {
+    return 0;
+  }
+  else if(((id - 1) % span_) == ((id - 1) / span_))
+  {
+    return 1;
+  }
+  return 0;
 }
 
 } // namespace
@@ -25,11 +57,135 @@ std::optional<T> get_default(const mc_rtc::Configuration & conf)
 namespace form
 {
 
+ArrayForm::ArrayForm(const ::Widget & parent, const std::string & name, const mc_rtc::Configuration & schema)
+: Widget(parent, name), schema_(schema)
+{
+  if(!schema_.has("items"))
+  {
+    mc_rtc::log::error_and_throw<std::runtime_error>("{} is an array without items", name);
+  }
+  auto items = schema("items");
+  if(!items.has("type"))
+  {
+    mc_rtc::log::error_and_throw<std::runtime_error>("{} is an array without items' type", name);
+  }
+  std::string type = items("type");
+  isArrayOfObject_ = type == "object";
+  isArrayOfArray_ = type == "array";
+  minSize_ = schema("minItems", 0);
+  maxSize_ = schema("maxItems", std::numeric_limits<size_t>::max());
+  for(size_t i = 0; i < minSize_; ++i)
+  {
+    addWidget();
+  }
+}
+
+bool ArrayForm::ready()
+{
+  if(isArrayOfObject_)
+  {
+    return std::all_of(widgets_.begin(), widgets_.end(), [](const auto & w) { return w->ready(); });
+  }
+  return !isArrayOfArray_ && std::any_of(widgets_.begin(), widgets_.end(), [](const auto & w) { return w->ready(); });
+}
+
+void ArrayForm::draw()
+{
+  if(isArrayOfArray_)
+  {
+    return;
+  }
+  size_t removeAt = widgets_.size();
+  ImGui::Text("%s", name().c_str());
+  ImGui::Columns(span(minSize_, maxSize_));
+  for(size_t i = 0; i < widgets_.size(); ++i)
+  {
+    widgets_[i]->draw();
+    if(widgets_.size() > minSize_)
+    {
+      ImGui::SameLine();
+      if(ImGui::Button(label("-", i).c_str()))
+      {
+        removeAt = i;
+      }
+    }
+    ImGui::NextColumn();
+  }
+  if(widgets_.size() < maxSize_ && ImGui::Button(label("+").c_str()))
+  {
+    addWidget();
+  }
+  removeWidget(removeAt);
+  ImGui::Columns(1);
+}
+
+void ArrayForm::collect(mc_rtc::Configuration & out)
+{
+  assert(ready());
+  auto array = out.array(name(), widgets_.size());
+  // FIXME Not very nice
+  for(size_t i = 0; i < widgets_.size(); ++i)
+  {
+    mc_rtc::Configuration temp;
+    widgets_[i]->collect(temp);
+    array.push(temp(widgets_[i]->name()));
+  }
+}
+
+void ArrayForm::addWidget()
+{
+  WidgetPtr widget;
+  std::string type = schema_("items")("type");
+  std::string nextName = fmt::format("##{}##{}", id_++, fullName());
+  if(type == "boolean")
+  {
+    widget = std::make_unique<Checkbox>(parent_, nextName, std::nullopt, false);
+  }
+  else if(type == "integer")
+  {
+    widget = std::make_unique<IntegerInput>(parent_, nextName, std::nullopt, default_<int>(id_, minSize_, maxSize_));
+  }
+  else if(type == "number")
+  {
+    widget = std::make_unique<NumberInput>(parent_, nextName, std::nullopt, default_<double>(id_, minSize_, maxSize_));
+  }
+  else if(type == "string")
+  {
+    widget = std::make_unique<StringInput>(parent_, nextName);
+  }
+  else if(type == "object")
+  {
+    widget = std::make_unique<ObjectForm>(parent_, nextName, schema_("items")("properties"),
+                                          schema_("items")("required", std::vector<std::string>{}));
+  }
+  else if(type == "array")
+  {
+    return;
+  }
+  else
+  {
+    mc_rtc::log::error("Unkown type {} in {}", type, name_);
+  }
+  if(widget)
+  {
+    widgets_.push_back(std::move(widget));
+  }
+}
+
+void ArrayForm::removeWidget(size_t idx)
+{
+  if(idx >= widgets_.size())
+  {
+    return;
+  }
+  widgets_.erase(widgets_.begin() + idx);
+}
+
 ObjectForm::ObjectForm(const ::Widget & parent,
                        const std::string & name,
                        const std::map<std::string, mc_rtc::Configuration> & properties,
                        const std::vector<std::string> & required)
-: form::Widget(parent, name)
+: Widget(parent, name)
 {
   for(const auto & p : properties)
   {
@@ -90,7 +246,7 @@ ObjectForm::ObjectForm(const ::Widget & parent,
       }
       else if(type == "array")
       {
-        // FIXME
+        widget = std::make_unique<ArrayForm>(parent, nextName, p.second);
       }
       else if(type == "object")
       {

@@ -115,8 +115,7 @@ void DataComboInput::draw()
     auto * schema_ptr = dynamic_cast<const Schema *>(&parent_);
     if(schema_ptr)
     {
-      auto valueOut = schema_ptr->value(value);
-      return valueOut ? valueOut.value() : "";
+      return schema_ptr->value(value).value_or("");
     }
     mc_rtc::log::error_and_throw<std::runtime_error>("Form element outisde of Form or Schema");
   };

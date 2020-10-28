@@ -129,6 +129,11 @@ struct SchemaForm
     return object_->value(name);
   }
 
+  bool ready() const
+  {
+    return object_->ready();
+  }
+
 private:
   std::unique_ptr<form::ObjectForm> object_;
 };
@@ -183,13 +188,13 @@ void Schema::draw2D()
   }
   if(form_)
   {
-    if(form_->draw(id.name.c_str()))
+    if(form_->draw(id.name.c_str()) && form_->ready())
     {
-      client.send_request(id, form_->data());
+      auto data = form_->data();
+      mc_rtc::log::info("REQUEST\n{}", data.dump(true, true));
+      client.send_request(id, data);
       form_ = std::make_unique<SchemaForm>(*this, form_->title(), schemas_[form_->title()]);
     }
-    const auto & schema = schemas_[form_->title()];
-    ImGui::Text("%s", schema.dump(true, true).c_str());
   }
 }
 
