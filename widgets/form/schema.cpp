@@ -33,6 +33,10 @@ ObjectForm::ObjectForm(const ::Widget & parent,
 {
   for(const auto & p : properties)
   {
+    if(p.first == "completion")
+    {
+      continue;
+    }
     bool is_required = std::find(required.begin(), required.end(), p.first) != required.end();
     std::unique_ptr<form::Widget> widget;
     std::string nextName = fmt::format("{}##{}", p.first, name);
