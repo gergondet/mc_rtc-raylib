@@ -34,6 +34,7 @@ void Category::draw2D()
     {
       ImGui::Separator();
     }
+    ImGui::Indent();
     std::sort(categories.begin(), categories.end(),
               [](const auto & lhs, const auto & rhs) { return lhs->name < rhs->name; });
     ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_Reorderable;
@@ -49,6 +50,7 @@ void Category::draw2D()
       }
       ImGui::EndTabBar();
     }
+    ImGui::Unindent();
   }
 }
 
