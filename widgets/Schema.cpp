@@ -1,5 +1,7 @@
 #include "Schema.h"
 
+#include "form/schema.h"
+
 #include <mc_rtc/config.h>
 
 namespace
@@ -83,7 +85,48 @@ void resolveAllOf(mc_rtc::Configuration conf)
 
 } // namespace
 
+struct SchemaForm
+{
+  SchemaForm(const ::Widget & parent, const std::string & name, const mc_rtc::Configuration & schema)
+  {
+    if(!schema.has("properties"))
+    {
+      mc_rtc::log::error_and_throw<std::runtime_error>("{} is not a correct schema, it has no properties");
+    }
+    object_ = std::make_unique<form::ObjectForm>(parent, name, schema("properties"),
+                                                 schema("required", std::vector<std::string>{}));
+  }
+
+  bool draw(const char * label)
+  {
+    object_->draw(false);
+    return ImGui::Button(label);
+  }
+
+  mc_rtc::Configuration data()
+  {
+    mc_rtc::Configuration out;
+    object_->collect(out);
+    return out;
+  }
+
+  const std::string & title()
+  {
+    return object_->fullName();
+  }
+
+  std::optional<std::string> value(const std::string & name) const
+  {
+    return object_->value(name);
+  }
+
+private:
+  std::unique_ptr<form::ObjectForm> object_;
+};
+
 Schema::Schema(Client & client, const ElementId & id) : Widget(client, id) {}
+
+Schema::~Schema() {}
 
 void Schema::data(const std::string & schema)
 {
@@ -91,6 +134,7 @@ void Schema::data(const std::string & schema)
   {
     return;
   }
+  form_.reset(nullptr);
   schema_ = schema;
   bfs::path all_schemas = bfs::path(mc_rtc::INSTALL_PREFIX) / "share" / "doc" / "mc_rtc" / "json" / "schemas";
   bfs::path schema_dir = all_schemas / schema_.c_str();
@@ -106,16 +150,48 @@ void Schema::data(const std::string & schema)
   {
     auto & schema = loadSchema(s);
     schemas_[schema("title")] = schema;
-    static bool show = true;
-    if(show)
-    {
-      mc_rtc::log::info("SCHEMA: {}", s.string());
-      mc_rtc::log::info("{}", schema.dump(true, true));
-    }
   }
 }
 
-void Schema::draw2D() {}
+void Schema::draw2D()
+{
+  const char * label_ = form_ ? form_->title().c_str() : "";
+  if(ImGui::BeginCombo(label("", "schemaSelector").c_str(), label_))
+  {
+    for(auto & s : schemas_)
+    {
+      bool selected = form_ && form_->title() == s.first;
+      if(ImGui::Selectable(s.first.c_str(), selected))
+      {
+        form_ = std::make_unique<SchemaForm>(*this, s.first, s.second);
+      }
+      if(selected)
+      {
+        ImGui::SetItemDefaultFocus();
+      }
+    }
+    ImGui::EndCombo();
+  }
+  if(form_)
+  {
+    if(form_->draw(id.name.c_str()))
+    {
+      client.send_request(id, form_->data());
+      form_ = std::make_unique<SchemaForm>(*this, form_->title(), schemas_[form_->title()]);
+    }
+    const auto & schema = schemas_[form_->title()];
+    ImGui::Text("%s", schema.dump(true, true).c_str());
+  }
+}
+
+std::optional<std::string> Schema::value(const std::string & name) const
+{
+  if(form_)
+  {
+    return form_->value(name);
+  }
+  return "";
+}
 
 mc_rtc::Configuration & Schema::loadSchema(const bfs::path & path)
 {

@@ -59,6 +59,7 @@ set(main_SRC
   widgets/Point3D.cpp
   widgets/form/widgets.cpp
   widgets/Schema.cpp
+  widgets/form/schema.cpp
   ${imgui_SRC}
 )
 

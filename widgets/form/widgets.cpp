@@ -1,6 +1,7 @@
 #include "widgets.h"
 
 #include "../Form.h"
+#include "../Schema.h"
 
 namespace form
 {
@@ -52,7 +53,7 @@ void ArrayInput::draw()
     }
   }
   ImGui::NextColumn();
-  ImGui::Text("%s", name.c_str());
+  ImGui::Text("%s", name().c_str());
   ImGui::Columns(1);
 }
 
@@ -62,6 +63,11 @@ ComboInput::ComboInput(const ::Widget & parent,
                        bool send_index)
 : SimpleInput(parent, name, ""), values_(values), idx_(values_.size()), send_index_(send_index)
 {
+  if(values_.size() == 1)
+  {
+    value_ = values_[0];
+    idx_ = 0;
+  }
 }
 
 void ComboInput::draw()
@@ -72,7 +78,7 @@ void ComboInput::draw()
 
 void ComboInput::draw(const char * label_)
 {
-  if(ImGui::BeginCombo(label(name).c_str(), label_))
+  if(ImGui::BeginCombo(label(name_).c_str(), label_))
   {
     for(size_t i = 0; i < values_.size(); ++i)
     {
@@ -100,8 +106,21 @@ DataComboInput::DataComboInput(const ::Widget & parent,
 
 void DataComboInput::draw()
 {
-  const auto & form = static_cast<const Form &>(parent_);
-  auto data = form.client.data();
+  auto getValue = [&](const std::string & value) {
+    auto * form_ptr = dynamic_cast<const Form *>(&parent_);
+    if(form_ptr)
+    {
+      return form_ptr->value(value);
+    }
+    auto * schema_ptr = dynamic_cast<const Schema *>(&parent_);
+    if(schema_ptr)
+    {
+      auto valueOut = schema_ptr->value(value);
+      return valueOut ? valueOut.value() : "";
+    }
+    mc_rtc::log::error_and_throw<std::runtime_error>("Form element outisde of Form or Schema");
+  };
+  auto data = parent_.client.data();
   std::string label;
   auto resolve = [&]() -> std::vector<std::string> {
     for(size_t i = 0; i < ref_.size(); ++i)
@@ -109,7 +128,7 @@ void DataComboInput::draw()
       std::string ref = ref_[i];
       if(ref.size() && ref[0] == '$')
       {
-        ref = form.value(ref.substr(1));
+        ref = getValue(ref.substr(1));
       }
       if(!data.has(ref))
       {

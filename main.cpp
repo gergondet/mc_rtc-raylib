@@ -96,6 +96,12 @@ int main(void)
     //----------------------------------------------------------------------------------
   }
 
+  mc_rtc::log::info("Camera on exit");
+  mc_rtc::log::info("position: {}, {}, {}", camera.position.x, camera.position.y, camera.position.z);
+  mc_rtc::log::info("target: {}, {}, {}", camera.target.x, camera.target.y, camera.target.z);
+  mc_rtc::log::info("up: {}, {}, {}", camera.up.x, camera.up.y, camera.up.z);
+  mc_rtc::log::info("fovy: {}", camera.fovy);
+
   client.clear();
 
   ImGui_ImplRaylib_Shutdown();

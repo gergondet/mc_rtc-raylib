@@ -10,7 +10,7 @@ namespace form
 
 struct Widget
 {
-  Widget(const ::Widget & parent, const std::string & name) : parent_(parent), name(name) {}
+  Widget(const ::Widget & parent, const std::string & name) : parent_(parent), name_(name) {}
 
   virtual ~Widget() = default;
 
@@ -18,20 +18,43 @@ struct Widget
 
   virtual void draw() = 0;
 
-  virtual std::string value() = 0;
+  inline virtual std::string value()
+  {
+    mc_rtc::log::error_and_throw<std::runtime_error>("::value() is not implemented for this form element");
+  }
 
   virtual void collect(mc_rtc::Configuration & out) = 0;
 
   template<typename T = const char *>
   inline std::string label(std::string_view label, T && suffix = "")
   {
-    return fmt::format("{}##{}{}{}{}", label, parent_.id.category, parent_.id.name, name, suffix);
+    return fmt::format("{}##{}{}{}{}", label, parent_.id.category, parent_.id.name, name_, suffix);
   }
 
-  std::string name;
+  inline std::string name() const
+  {
+    size_t pos = name_.find("##");
+    if(pos != std::string::npos)
+    {
+      return name_.substr(0, pos);
+    }
+    return name_;
+  }
+
+  inline const std::string & fullName() const
+  {
+    return name_;
+  }
+
   bool required;
 
+  inline const ::Widget & parent() const
+  {
+    return parent_;
+  }
+
 protected:
+  std::string name_;
   const ::Widget & parent_;
 };
 
@@ -40,9 +63,13 @@ struct SimpleInput : public Widget
 {
   SimpleInput(const ::Widget & parent, const std::string & name) : Widget(parent, name) {}
 
-  SimpleInput(const ::Widget & parent, const std::string & name, const DataT & value)
-  : Widget(parent, name), value_(value), temp_(value)
+  SimpleInput(const ::Widget & parent, const std::string & name, const std::optional<DataT> & value)
+  : Widget(parent, name), value_(value)
   {
+    if(value_.has_value())
+    {
+      temp_ = value.value();
+    }
   }
 
   ~SimpleInput() override = default;
@@ -62,7 +89,7 @@ struct SimpleInput : public Widget
   void collect(mc_rtc::Configuration & out) override
   {
     assert(ready());
-    out.add(name, value_.value());
+    out.add(name(), value_.value());
   }
 
   std::string value() override
@@ -88,7 +115,7 @@ struct Checkbox : public SimpleInput<bool>
 
   inline void draw() override
   {
-    if(ImGui::Checkbox(label(name).c_str(), &temp_))
+    if(ImGui::Checkbox(label(name_).c_str(), &temp_))
     {
       value_ = temp_;
     }
@@ -101,7 +128,7 @@ struct IntegerInput : public SimpleInput<int>
 
   inline void draw() override
   {
-    if(ImGui::InputInt(label(name).c_str(), &temp_, 0, 0))
+    if(ImGui::InputInt(label(name_).c_str(), &temp_, 0, 0))
     {
       value_ = temp_;
     }
@@ -114,7 +141,7 @@ struct NumberInput : public SimpleInput<double>
 
   inline void draw() override
   {
-    if(ImGui::InputDouble(label(name).c_str(), &temp_))
+    if(ImGui::InputDouble(label(name_).c_str(), &temp_))
     {
       value_ = temp_;
     }
@@ -132,9 +159,9 @@ struct StringInput : public SimpleInput<std::string>
     {
       buffer_.resize(std::max<size_t>(value.size() + 1, 256));
       std::memcpy(buffer_.data(), value.data(), value.size());
-      buffer_[value.size()] = '0';
+      buffer_[value.size()] = 0;
     }
-    if(ImGui::InputText(label(name).c_str(), buffer_.data(), buffer_.size()))
+    if(ImGui::InputText(label(name_).c_str(), buffer_.data(), buffer_.size()))
     {
       value_ = {buffer_.data(), strnlen(buffer_.data(), buffer_.size())};
     }
@@ -168,11 +195,11 @@ struct ComboInput : public SimpleInput<std::string>
     assert(ready());
     if(send_index_)
     {
-      out.add(name, idx_);
+      out.add(name(), idx_);
     }
     else
     {
-      out.add(name, value_.value());
+      out.add(name(), value_.value());
     }
   }
 

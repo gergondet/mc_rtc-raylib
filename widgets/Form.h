@@ -24,7 +24,7 @@ struct Form : public Widget
 
   inline std::string value(const std::string & name) const
   {
-    auto pred = [&](auto && w) { return w->name == name; };
+    auto pred = [&](auto && w) { return w->fullName() == name; };
     auto it = std::find_if(requiredWidgets_.begin(), requiredWidgets_.end(), pred);
     if(it == requiredWidgets_.end())
     {
@@ -44,12 +44,14 @@ struct Form : public Widget
       w->draw();
     }
     // FIXME Maybe always show if there is few optional elements?
-    if(requiredWidgets_.size() == 0 || ImGui::CollapsingHeader(label("Optional").c_str()))
+    if(requiredWidgets_.size() == 0 || (otherWidgets_.size() && ImGui::CollapsingHeader(label("Optional").c_str())))
     {
+      ImGui::Indent();
       for(auto & w : otherWidgets_)
       {
         w->draw();
       }
+      ImGui::Unindent();
     }
     if(ImGui::Button(label(id.name).c_str()))
     {
@@ -85,7 +87,7 @@ protected:
   template<typename WidgetT, typename... Args>
   void widget(const std::string & name, std::vector<form::WidgetPtr> & widgets, Args &&... args)
   {
-    auto it = std::find_if(widgets.begin(), widgets.end(), [&](const auto & w) { return w->name == name; });
+    auto it = std::find_if(widgets.begin(), widgets.end(), [&](const auto & w) { return w->fullName() == name; });
     if(it == widgets.end())
     {
       widgets.push_back(std::make_unique<WidgetT>(*this, name, std::forward<Args>(args)...));
