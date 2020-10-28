@@ -95,28 +95,32 @@ void ArrayForm::draw()
   {
     return;
   }
-  size_t removeAt = widgets_.size();
-  ImGui::Text("%s", name().c_str());
-  ImGui::Columns(span(minSize_, maxSize_));
-  for(size_t i = 0; i < widgets_.size(); ++i)
+  if(ImGui::CollapsingHeader(label(name_).c_str()))
   {
-    widgets_[i]->draw();
-    if(widgets_.size() > minSize_)
+    ImGui::Indent();
+    size_t removeAt = widgets_.size();
+    ImGui::Columns(span(minSize_, maxSize_));
+    for(size_t i = 0; i < widgets_.size(); ++i)
     {
-      ImGui::SameLine();
-      if(ImGui::Button(label("-", i).c_str()))
+      widgets_[i]->draw();
+      if(widgets_.size() > minSize_)
       {
-        removeAt = i;
+        ImGui::SameLine();
+        if(ImGui::Button(label("-", i).c_str()))
+        {
+          removeAt = i;
+        }
       }
+      ImGui::NextColumn();
     }
-    ImGui::NextColumn();
+    if(widgets_.size() < maxSize_ && ImGui::Button(label("+").c_str()))
+    {
+      addWidget();
+    }
+    removeWidget(removeAt);
+    ImGui::Unindent();
+    ImGui::Columns(1);
   }
-  if(widgets_.size() < maxSize_ && ImGui::Button(label("+").c_str()))
-  {
-    addWidget();
-  }
-  removeWidget(removeAt);
-  ImGui::Columns(1);
 }
 
 void ArrayForm::collect(mc_rtc::Configuration & out)
@@ -194,6 +198,7 @@ ObjectForm::ObjectForm(const ::Widget & parent,
       continue;
     }
     bool is_required = std::find(required.begin(), required.end(), p.first) != required.end();
+    bool is_robot = false;
     std::unique_ptr<form::Widget> widget;
     std::string nextName = fmt::format("{}##{}", p.first, name);
     if(p.second.has("enum"))
@@ -212,6 +217,7 @@ ObjectForm::ObjectForm(const ::Widget & parent,
         if(p.first == "robotIndex")
         {
           widget = std::make_unique<DataComboInput>(parent, nextName, std::vector<std::string>{"robots"}, true);
+          is_robot = true;
         }
         else
         {
@@ -227,6 +233,7 @@ ObjectForm::ObjectForm(const ::Widget & parent,
         if(p.first == "robot" || p.first == "r1" || p.first == "r2")
         {
           widget = std::make_unique<DataComboInput>(parent, nextName, std::vector<std::string>{"robots"}, false);
+          is_robot = true;
         }
         else if(p.first == "body")
         {
@@ -267,6 +274,10 @@ ObjectForm::ObjectForm(const ::Widget & parent,
     {
       required_.push_back(std::move(widget));
     }
+    else if(is_robot)
+    {
+      required_.insert(required_.begin(), std::move(widget));
+    }
     else
     {
       widgets_.push_back(std::move(widget));
@@ -292,9 +303,8 @@ void ObjectForm::draw(bool show_header)
       w->draw();
       ImGui::Separator();
     }
-    if(widgets_.size())
+    if(widgets_.size() && ImGui::CollapsingHeader(label("Optional fields").c_str()))
     {
-      ImGui::Text("Optional fields");
       ImGui::Separator();
       ImGui::Indent();
       for(auto & w : widgets_)

@@ -78,6 +78,10 @@ void ComboInput::draw()
 
 void ComboInput::draw(const char * label_)
 {
+  if(values_.size() == 1 && value_.has_value())
+  {
+    return;
+  }
   if(ImGui::BeginCombo(label(name_).c_str(), label_))
   {
     for(size_t i = 0; i < values_.size(); ++i)
