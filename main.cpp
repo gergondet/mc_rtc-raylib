@@ -8,6 +8,8 @@
 #include "Client.h"
 #include "utils.h"
 
+#include "Robot_Regular_ttf.h"
+
 #include "imgui.h"
 #include "imgui_impl_opengl3.h"
 #include "imgui_impl_raylib.h"
@@ -40,7 +42,12 @@ int main(void)
 
   ImGui::CreateContext();
   ImGuiIO & io = ImGui::GetIO();
-  ImGui::StyleColorsDark();
+  ImGui::StyleColorsLight();
+  io.FontDefault = io.Fonts->AddFontFromMemoryTTF(Roboto_Regular_ttf, Roboto_Regular_ttf_len, 18.0f);
+  auto & style = ImGui::GetStyle();
+  style.FrameRounding = 6.0f;
+  auto & bgColor = style.Colors[ImGuiCol_WindowBg];
+  bgColor.w = 0.5f;
 
   ImGui_ImplOpenGL3_Init();
   ImGui_ImplRaylib_Init();
