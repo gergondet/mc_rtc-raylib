@@ -18,6 +18,12 @@ struct Widget
 
   virtual void draw() = 0;
 
+  /** A form widget is trivial if it doesn't contain other widgets */
+  inline virtual bool trivial() const
+  {
+    return true;
+  }
+
   inline virtual std::string value()
   {
     mc_rtc::log::error_and_throw<std::runtime_error>("::value() is not implemented for this form element");

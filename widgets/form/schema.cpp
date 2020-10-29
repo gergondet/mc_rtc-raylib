@@ -283,6 +283,18 @@ ObjectForm::ObjectForm(const ::Widget & parent,
       widgets_.push_back(std::move(widget));
     }
   }
+  std::sort(widgets_.begin(), widgets_.end(), [](const WidgetPtr & lhs, const WidgetPtr & rhs) {
+    // lhs is trivial, it's "smaller" if rhs is non trivial or rhs is trivial and has a smaller name
+    if(lhs->trivial())
+    {
+      return !rhs->trivial() || (rhs->trivial() && lhs->fullName() < rhs->fullName());
+    }
+    // lhs is non-trivial, it's smaller than rhs if rhs is also non-trivial and has a smaller name
+    else
+    {
+      return !rhs->trivial() && lhs->fullName() < rhs->fullName();
+    }
+  });
 }
 
 bool ObjectForm::ready()

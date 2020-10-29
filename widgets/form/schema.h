@@ -15,6 +15,11 @@ struct ArrayForm : public Widget
 
   void collect(mc_rtc::Configuration & out) override;
 
+  inline bool trivial() const override
+  {
+    return false;
+  }
+
 protected:
   mc_rtc::Configuration schema_;
   size_t minSize_;
@@ -45,6 +50,11 @@ struct ObjectForm : public Widget
   void collect(mc_rtc::Configuration & out) override;
 
   std::optional<std::string> value(const std::string & name) const;
+
+  inline bool trivial() const override
+  {
+    return false;
+  }
 
 protected:
   std::vector<WidgetPtr> required_;
