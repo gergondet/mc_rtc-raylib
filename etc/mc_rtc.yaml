@@ -1,0 +1,7 @@
+MainRobot: JVRC1
+Enabled: CoM
+Timestep: 0.005
+Log: false
+GUIServer:
+  Enable: true
+  Timestep: 0.015

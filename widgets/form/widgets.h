@@ -225,7 +225,7 @@ struct ComboInput : public SimpleInput<std::string>
     assert(ready());
     if(send_index_)
     {
-      out.add(name(), idx_);
+      out.add(name(), static_cast<unsigned int>(idx_));
     }
     else
     {

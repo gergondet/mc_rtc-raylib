@@ -7,6 +7,7 @@
 #include "raymath.h"
 
 #include <memory>
+#include <vector>
 
 enum class ControlAxis
 {

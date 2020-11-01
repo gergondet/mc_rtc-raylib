@@ -22,8 +22,8 @@ struct ArrayForm : public Widget
 
 protected:
   mc_rtc::Configuration schema_;
-  size_t minSize_;
-  size_t maxSize_;
+  unsigned int minSize_;
+  unsigned int maxSize_;
   bool isArrayOfObject_ = false;
   bool isArrayOfArray_ = false;
   std::vector<WidgetPtr> widgets_;

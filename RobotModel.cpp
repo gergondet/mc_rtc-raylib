@@ -135,6 +135,7 @@ bfs::path convertURI(const std::string & uri)
     }
     return pkg / leaf;
   }
+  return uri;
 }
 
 BodyDrawer::ModelData::~ModelData()

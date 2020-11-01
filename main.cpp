@@ -14,6 +14,66 @@
 #include "imgui_impl_opengl3.h"
 #include "imgui_impl_raylib.h"
 
+#ifdef __EMSCRIPTEN__
+#  include <emscripten/emscripten.h>
+#endif
+
+static OrbitCamera * camera_ptr = nullptr;
+static Client * client_ptr = nullptr;
+static SceneState * state_ptr = nullptr;
+static ImGuiIO * io_ptr = nullptr;
+
+void RenderLoop()
+{
+  static auto & camera = *camera_ptr;
+  static auto & client = *client_ptr;
+  static auto & state = *state_ptr;
+  static auto & io = *io_ptr;
+  ImGui_ImplOpenGL3_NewFrame();
+  ImGui_ImplRaylib_NewFrame();
+  ImGui::NewFrame();
+  ImGui_ImplRaylib_ProcessEvent();
+
+  if(io.WantCaptureMouse && state.mouseHandler == nullptr)
+  {
+    state.mouseHandler = &io;
+  }
+  else if(!io.WantCaptureMouse && state.mouseHandler == &io)
+  {
+    state.mouseHandler = nullptr;
+  }
+
+  client.update(state);
+  camera.update(state);
+  //----------------------------------------------------------------------------------
+
+  // Draw
+  //----------------------------------------------------------------------------------
+  BeginDrawing();
+
+  ClearBackground(RAYWHITE);
+
+  BeginMode3D(camera);
+
+  DrawGridXY(10, 1.0f);
+
+  client.draw3D(camera);
+
+  DrawFrame(sva::PTransformd::Identity());
+
+  EndMode3D();
+
+  DrawFPS(10, 10);
+
+  client.draw2D();
+  ImGui::ShowDemoWindow();
+  ImGui::Render();
+  ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+  EndDrawing();
+  //----------------------------------------------------------------------------------
+}
+
 int main(void)
 {
   // Initialization
@@ -28,6 +88,7 @@ int main(void)
 
   // Define the camera to look into our 3d world
   OrbitCamera camera;
+  camera_ptr = &camera;
   camera.position = (Vector3){2.5f, -1.5f, 1.3f}; // Camera position
   camera.target = (Vector3){-0.15f, -0.4f, 0.75f}; // Camera looking at point
   camera.up = (Vector3){0.0f, 0.0f, 1.0f}; // Camera up vector (rotation towards target)
@@ -35,6 +96,7 @@ int main(void)
   camera.type = CAMERA_PERSPECTIVE; // Camera mode type
 
   Client client("ipc:///tmp/mc_rtc_pub.ipc", "ipc:///tmp/mc_rtc_rep.ipc", 1);
+  client_ptr = &client;
 
   SetCameraMode(camera, CAMERA_FREE); // Set a free camera mode
 
@@ -42,6 +104,7 @@ int main(void)
 
   ImGui::CreateContext();
   ImGuiIO & io = ImGui::GetIO();
+  io_ptr = &io;
   ImGui::StyleColorsLight();
   io.FontDefault = io.Fonts->AddFontFromMemoryTTF(Roboto_Regular_ttf, Roboto_Regular_ttf_len, 18.0f);
   auto & style = ImGui::GetStyle();
@@ -53,55 +116,17 @@ int main(void)
   ImGui_ImplRaylib_Init();
 
   SceneState state;
+  state_ptr = &state;
   state.camera = &camera;
 
-  // Main game loop
-  while(!WindowShouldClose()) // Detect window close button or ESC key
+#ifdef __EMSCRIPTEN__
+  emscripten_set_main_loop(RenderLoop, 0, 1);
+#else
+  while(!WindowShouldClose())
   {
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplRaylib_NewFrame();
-    ImGui::NewFrame();
-    ImGui_ImplRaylib_ProcessEvent();
-
-    if(io.WantCaptureMouse && state.mouseHandler == nullptr)
-    {
-      state.mouseHandler = &io;
-    }
-    else if(!io.WantCaptureMouse && state.mouseHandler == &io)
-    {
-      state.mouseHandler = nullptr;
-    }
-
-    client.update(state);
-    camera.update(state);
-    //----------------------------------------------------------------------------------
-
-    // Draw
-    //----------------------------------------------------------------------------------
-    BeginDrawing();
-
-    ClearBackground(RAYWHITE);
-
-    BeginMode3D(camera);
-
-    DrawGridXY(10, 1.0f);
-
-    client.draw3D(camera);
-
-    DrawFrame(sva::PTransformd::Identity());
-
-    EndMode3D();
-
-    DrawFPS(10, 10);
-
-    client.draw2D();
-    ImGui::ShowDemoWindow();
-    ImGui::Render();
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-    EndDrawing();
-    //----------------------------------------------------------------------------------
+    RenderLoop();
   }
+#endif
 
   mc_rtc::log::info("Camera on exit");
   mc_rtc::log::info("position: {}, {}, {}", camera.position.x, camera.position.y, camera.position.z);

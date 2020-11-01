@@ -73,7 +73,7 @@ ArrayForm::ArrayForm(const ::Widget & parent, const std::string & name, const mc
   isArrayOfObject_ = type == "object";
   isArrayOfArray_ = type == "array";
   minSize_ = schema("minItems", 0);
-  maxSize_ = schema("maxItems", std::numeric_limits<size_t>::max());
+  maxSize_ = schema("maxItems", std::numeric_limits<unsigned int>::max());
   for(size_t i = 0; i < minSize_; ++i)
   {
     addWidget();

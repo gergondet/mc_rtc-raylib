@@ -15,13 +15,30 @@ project(mc-rtc-raylib LANGUAGES C CXX VERSION 0.1.0)
 
 find_package(mc_rtc REQUIRED)
 
+if(EMSCRIPTEN)
+  set(CMAKE_EXECUTABLE_SUFFIX .html)
+
+  find_description_package(mc_env_description)
+  find_description_package(jvrc_description)
+
+  file(COPY etc/mc_rtc.yaml DESTINATION ${PROJECT_BINARY_DIR}/assets/etc/)
+  file(COPY ${JVRC_DESCRIPTION_PATH} DESTINATION ${PROJECT_BINARY_DIR}/assets/)
+  file(COPY ${MC_ENV_DESCRIPTION_PATH} DESTINATION ${PROJECT_BINARY_DIR}/assets/)
+endif()
+
 find_package(assimp REQUIRED)
 
 set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE) # don't build the supplied examples
 set(BUILD_GAMES    OFF CACHE BOOL "" FORCE) # or games
 set(SUPPORT_FILEFORMAT_BMP ON CACHE BOOL "" FORCE) # Support for loading bmp files
 set(SUPPORT_FILEFORMAT_JPG ON CACHE BOOL "" FORCE) # Support for loading jpg files
+if(EMSCRIPTEN)
+  set(PLATFORM "Web" CACHE STRING "" FORCE)
+endif()
 add_subdirectory(raylib)
+if(EMSCRIPTEN)
+  target_compile_options(raylib_static PUBLIC "-matomics" -s USE_PTHREADS=1)
+endif()
 
 set(imgui_SRC
   imgui/imgui.h
@@ -66,7 +83,14 @@ set(main_SRC
 file(COPY raylib/src/external/glad.h DESTINATION "${PROJECT_BINARY_DIR}/include/glad/")
 
 add_executable(main ${main_SRC})
-target_compile_definitions(main PUBLIC R3D_ASSIMP_SUPPORT IMGUI_IMPL_OPENGL_LOADER_GLAD)
+if(EMSCRIPTEN)
+  target_link_libraries(main PUBLIC "-s USE_GLFW=3")
+endif()
+target_compile_definitions(main PUBLIC R3D_ASSIMP_SUPPORT)
+if(EMSCRIPTEN)
+  target_compile_options(main PUBLIC "-matomics" -s USE_PTHREADS=1)
+  target_link_libraries(main PUBLIC IrrXML "--preload-file assets" "-s USE_PTHREADS=1" "-s PTHREAD_POOL_SIZE=8" "-Wl,--error-limit=0" "-s DISABLE_EXCEPTION_CATCHING=0" "-s TOTAL_MEMORY=512MB" "-matomics" "-s USE_ZLIB=1" "-s ALLOW_MEMORY_GROWTH=1")
+endif()
 target_link_libraries(main PUBLIC raylib mc_rtc::mc_control_client mc_rtc::mc_control ${ASSIMP_LIBRARIES})
 target_include_directories(main PUBLIC
   ${ASSIMP_INCLUDE_DIRS}
