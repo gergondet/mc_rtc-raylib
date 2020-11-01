@@ -1,6 +1,8 @@
 #include <mc_rbdyn/RobotLoader.h>
 #include <mc_rbdyn/Robots.h>
 
+#include <mc_rtc/version.h>
+
 #include <cmath>
 #include <iostream>
 
@@ -18,10 +20,14 @@
 #  include <emscripten/emscripten.h>
 #endif
 
+#include "RobotModel.h"
+
 static OrbitCamera * camera_ptr = nullptr;
 static Client * client_ptr = nullptr;
 static SceneState * state_ptr = nullptr;
 static ImGuiIO * io_ptr = nullptr;
+static mc_rbdyn::Robot * robot_ptr = nullptr;
+static RobotModel * model_ptr = nullptr;
 
 void RenderLoop()
 {
@@ -29,6 +35,8 @@ void RenderLoop()
   static auto & client = *client_ptr;
   static auto & state = *state_ptr;
   static auto & io = *io_ptr;
+  static auto & robot = *robot_ptr;
+  static auto & model = *model_ptr;
   ImGui_ImplOpenGL3_NewFrame();
   ImGui_ImplRaylib_NewFrame();
   ImGui::NewFrame();
@@ -45,6 +53,7 @@ void RenderLoop()
 
   client.update(state);
   camera.update(state);
+  model.update(robot);
   //----------------------------------------------------------------------------------
 
   // Draw
@@ -60,6 +69,8 @@ void RenderLoop()
   client.draw3D(camera);
 
   DrawFrame(sva::PTransformd::Identity());
+
+  model.draw(camera);
 
   EndMode3D();
 
@@ -118,6 +129,15 @@ int main(void)
   SceneState state;
   state_ptr = &state;
   state.camera = &camera;
+
+  mc_rtc::log::info("mc_rtc::version() {}", mc_rtc::version());
+
+  auto rm = mc_rbdyn::RobotLoader::get_robot_module("JVRC1");
+  auto robots = mc_rbdyn::loadRobot(*rm);
+  auto & robot = robots->robot();
+  robot_ptr = &robot;
+  RobotModel model(robot);
+  model_ptr = &model;
 
 #ifdef __EMSCRIPTEN__
   emscripten_set_main_loop(RenderLoop, 0, 1);

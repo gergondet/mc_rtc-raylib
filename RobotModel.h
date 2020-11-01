@@ -6,7 +6,7 @@
 
 struct BodyDrawer
 {
-  BodyDrawer(const std::vector<rbd::parsers::Visual> & v, Shader shader);
+  BodyDrawer(const std::vector<rbd::parsers::Visual> & v, Shader * shader = nullptr);
 
   void update(const sva::PTransformd & pos);
 

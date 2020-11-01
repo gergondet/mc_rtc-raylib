@@ -143,20 +143,27 @@ BodyDrawer::ModelData::~ModelData()
   UnloadModel(model);
 }
 
-BodyDrawer::BodyDrawer(const std::vector<rbd::parsers::Visual> & v, Shader shader)
+BodyDrawer::BodyDrawer(const std::vector<rbd::parsers::Visual> & v, Shader  * shader)
 {
   auto fromMesh = [&](const rbd::parsers::Visual & v) {
     const auto & mesh = boost::get<rbd::parsers::Geometry::Mesh>(v.geometry.data);
     auto path = convertURI(mesh.filename);
+#ifndef __EMSCRIPTEN__
     auto cwd = bfs::current_path();
     bfs::current_path(path.parent_path());
+#endif
     models_.emplace_back(new ModelData{LoadModelAdvanced(path.string().c_str()), path.leaf().string(),
                                        static_cast<float>(mesh.scale), v.origin});
-    for(int i = 0; i < models_.back()->model.materialCount; ++i)
+    if(shader)
     {
-      models_.back()->model.materials[i].shader = shader;
+      for(int i = 0; i < models_.back()->model.materialCount; ++i)
+      {
+        models_.back()->model.materials[i].shader = *shader;
+      }
     }
+#ifndef __EMSCRIPTEN__
     bfs::current_path(cwd);
+#endif
   };
   for(const auto & visual : v)
   {
@@ -190,18 +197,24 @@ void BodyDrawer::draw()
 RobotModel::RobotModel(const mc_rbdyn::Robot & robot, bool useCollisionModel)
 {
   const auto & visual = useCollisionModel ? robot.module()._collision : robot.module()._visual;
+#ifndef __EMSCRIPTEN__
   shader_ = LoadShaderCode(GOOSH_VERTEX_SHADER.c_str(), GOOSH_FRAGMENT_SHADER.c_str());
   shader_.locs[LOC_MATRIX_MODEL] = GetShaderLocation(shader_, "matModel");
   shader_.locs[LOC_VECTOR_VIEW] = GetShaderLocation(shader_, "viewPos");
+#endif
   for(const auto & b : robot.mb().bodies())
   {
     if(!visual.count(b.name()))
     {
-      bodies_.push_back({{}, shader_});
+      bodies_.push_back({{}, nullptr});
     }
     else
     {
-      bodies_.emplace_back(visual.at(b.name()), shader_);
+#ifndef __EMSCRIPTEN__
+      bodies_.emplace_back(visual.at(b.name()), &shader_);
+#else
+      bodies_.emplace_back(visual.at(b.name()));
+#endif
     }
   }
 }
@@ -218,7 +231,9 @@ void RobotModel::update(const mc_rbdyn::Robot & robot)
 void RobotModel::draw(Camera camera)
 {
   float cameraPos[3] = {camera.position.x, camera.position.y, camera.position.z};
+#ifndef __EMSCRIPTEN__
   SetShaderValue(shader_, shader_.locs[LOC_VECTOR_VIEW], cameraPos, UNIFORM_VEC3);
+#endif
   for(auto & b : bodies_)
   {
     b.draw();
