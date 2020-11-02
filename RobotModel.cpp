@@ -151,6 +151,9 @@ BodyDrawer::BodyDrawer(const std::vector<rbd::parsers::Visual> & v, Shader  * sh
 #ifndef __EMSCRIPTEN__
     auto cwd = bfs::current_path();
     bfs::current_path(path.parent_path());
+#else
+    auto cwd = get_current_dir_name();
+    chdir(path.parent_path().string().c_str());
 #endif
     models_.emplace_back(new ModelData{LoadModelAdvanced(path.string().c_str()), path.leaf().string(),
                                        static_cast<float>(mesh.scale), v.origin});
@@ -163,6 +166,9 @@ BodyDrawer::BodyDrawer(const std::vector<rbd::parsers::Visual> & v, Shader  * sh
     }
 #ifndef __EMSCRIPTEN__
     bfs::current_path(cwd);
+#else
+    chdir(cwd);
+    free(cwd);
 #endif
   };
   for(const auto & visual : v)

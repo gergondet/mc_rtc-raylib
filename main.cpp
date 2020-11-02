@@ -77,7 +77,9 @@ void RenderLoop()
   DrawFPS(10, 10);
 
   client.draw2D();
+#ifndef __EMSCRIPTEN__
   ImGui::ShowDemoWindow();
+#endif
   ImGui::Render();
   ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
