@@ -30,6 +30,33 @@ void Client::update(SceneState & state)
   run(buffer_, t_last_);
 }
 
+void Client::update(SceneState & state, mc_control::ControllerServer & server, mc_rtc::gui::StateBuilder & gui)
+{
+  gui_ = &gui;
+  server_ = &server;
+  root_.update(state);
+  server.publish(gui);
+  auto data = server.data();
+  if(data.second != 0)
+  {
+    run(data.first, data.second);
+  }
+}
+
+void Client::send_request(const ElementId & id, const mc_rtc::Configuration & data)
+{
+  if(server_)
+  {
+    std::string buffer;
+    raw_request(id, data, buffer);
+    server_->handle_requests(*gui_, buffer.c_str());
+  }
+  else
+  {
+    mc_control::ControllerClient::send_request(id, data);
+  }
+}
+
 void Client::draw2D()
 {
   ImGui::Begin("mc_rtc");

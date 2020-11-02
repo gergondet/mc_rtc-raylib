@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mc_control/ControllerClient.h>
+#include <mc_control/ControllerServer.h>
 
 #include <mc_rbdyn/Robots.h>
 
@@ -21,6 +22,9 @@ struct Client : public mc_control::ControllerClient
   /** Update the client data from the latest server message */
   void update(SceneState & state);
 
+  /** Update the client data from the latest server message */
+  void update(SceneState & state, mc_control::ControllerServer & server, mc_rtc::gui::StateBuilder & gui);
+
   /** Draw 2D elements */
   void draw2D();
 
@@ -35,9 +39,24 @@ struct Client : public mc_control::ControllerClient
     return data_;
   }
 
+  /** We voluntarily hide ControllerClient::send_request to send raw request transparently */
+  void send_request(const ElementId & id, const mc_rtc::Configuration & data = {});
+
+  /** Helper for send_request in simple cases */
+  template<typename T>
+  void send_request(const ElementId & id, const T & data)
+  {
+    mc_rtc::Configuration c;
+    c.add("data", data);
+    send_request(id, c("data"));
+  }
+
 private:
   std::vector<char> buffer_ = std::vector<char>(65535);
   std::chrono::system_clock::time_point t_last_ = std::chrono::system_clock::now();
+
+  mc_rtc::gui::StateBuilder * gui_ = nullptr;
+  mc_control::ControllerServer * server_ = nullptr;
 
   /** No message for unsupported types */
   void default_impl(const std::string &, const ElementId &) final {}

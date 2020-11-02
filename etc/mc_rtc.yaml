@@ -1,7 +1,13 @@
 MainRobot: JVRC1
 Enabled: CoM
-Timestep: 0.005
+Timestep: 0.02
 Log: false
 GUIServer:
   Enable: true
   Timestep: 0.015
+  TCP:
+    # Binding host, * binds to all interfaces
+    Host: "*"
+    # Binding ports, the first is used for PUB socket and the second for
+    # the PULL socket
+    Ports: [4242, 4343]

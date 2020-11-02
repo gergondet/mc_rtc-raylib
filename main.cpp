@@ -23,7 +23,7 @@
 #endif
 
 // Target FPS for the ticker
-constexpr size_t fps = 100;
+constexpr size_t fps = 50;
 
 static OrbitCamera * camera_ptr = nullptr;
 static Client * client_ptr = nullptr;
@@ -60,7 +60,11 @@ void RenderLoop()
     state.mouseHandler = nullptr;
   }
 
+#ifndef __EMSCRIPTEN__
   client.update(state);
+#else
+  client.update(state, data.gc->server(), *data.gc->controller().gui());
+#endif
   camera.update(state);
   //----------------------------------------------------------------------------------
 
