@@ -252,6 +252,7 @@ int main(void)
   camera.type = CAMERA_PERSPECTIVE; // Camera mode type
 
   Client client;
+  client.register_log_sink();
   client_ptr = &client;
 
   SetCameraMode(camera, CAMERA_FREE); // Set a free camera mode

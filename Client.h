@@ -6,6 +6,7 @@
 #include <mc_rbdyn/Robots.h>
 
 #include "InteractiveMarker.h"
+#include "LogSink.h"
 #include "RobotModel.h"
 #include "SceneState.h"
 
@@ -21,6 +22,9 @@ struct Client : public mc_control::ControllerClient
 
   /** Bring-in stop to kill the connection */
   using mc_control::ControllerClient::stop;
+
+  /** Register the log sink */
+  void register_log_sink();
 
   /** Update the client data from the latest server message */
   void update(SceneState & state);
@@ -40,6 +44,8 @@ struct Client : public mc_control::ControllerClient
   }
 
 private:
+  std::shared_ptr<LogSink> sink_;
+
   std::vector<char> buffer_ = std::vector<char>(65535);
   std::chrono::system_clock::time_point t_last_ = std::chrono::system_clock::now();
 

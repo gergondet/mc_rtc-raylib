@@ -24,6 +24,17 @@
 #include "widgets/Transform.h"
 #include "widgets/XYTheta.h"
 
+void Client::register_log_sink()
+{
+  if(!sink_)
+  {
+    sink_ = std::make_shared<LogSink>();
+  }
+  mc_rtc::log::details::info().sinks().push_back(sink_);
+  mc_rtc::log::details::success().sinks().push_back(sink_);
+  mc_rtc::log::details::cerr().sinks().push_back(sink_);
+}
+
 void Client::update(SceneState & state)
 {
   root_.update(state);
@@ -36,6 +47,15 @@ void Client::draw2D()
   {
     ImGui::Begin("mc_rtc");
     root_.draw2D();
+    ImGui::End();
+  }
+  if(sink_)
+  {
+    ImGui::Begin("Console");
+    for(const auto & m : sink_->msgs())
+    {
+      ImGui::Text(m.msg.c_str());
+    }
     ImGui::End();
   }
 }
