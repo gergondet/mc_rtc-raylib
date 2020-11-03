@@ -59,9 +59,12 @@ void Client::send_request(const ElementId & id, const mc_rtc::Configuration & da
 
 void Client::draw2D()
 {
-  ImGui::Begin("mc_rtc");
-  root_.draw2D();
-  ImGui::End();
+  if(!root_.empty())
+  {
+    ImGui::Begin("mc_rtc");
+    root_.draw2D();
+    ImGui::End();
+  }
 }
 
 void Client::draw3D(Camera camera)

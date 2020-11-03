@@ -26,6 +26,11 @@ struct Category
   std::vector<WidgetPtr> widgets;
   std::vector<CategoryPtr> categories;
 
+  inline bool empty() const
+  {
+    return widgets.size() == 0 && categories.size() == 0;
+  }
+
   void update(SceneState & state);
   void draw2D();
   void draw3D(Camera camera);
