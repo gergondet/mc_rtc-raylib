@@ -1,9 +1,9 @@
 [submodule "raylib-3D"]
 	path = raylib-3D
-	url = git@github.com:gergondet/raylib-3D.git
+	url = https://github.com/gergondet/raylib-3D.git
 [submodule "raylib"]
 	path = raylib
-	url = https://github.com/raysan5/raylib
+	url = https://github.com/gergondet/raylib
 [submodule "imgui"]
 	path = imgui
 	url = https://github.com/ocornut/imgui.git

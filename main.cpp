@@ -51,6 +51,10 @@ void RenderLoop()
   ImGui::NewFrame();
   ImGui_ImplRaylib_ProcessEvent();
 
+#ifdef __EMSCRIPTEN__
+  ShowCursor();
+#endif
+
   if(io.WantCaptureMouse && state.mouseHandler == nullptr)
   {
     state.mouseHandler = &io;
