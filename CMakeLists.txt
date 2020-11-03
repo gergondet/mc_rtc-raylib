@@ -83,15 +83,15 @@ set(main_SRC
 file(COPY raylib/src/external/glad.h DESTINATION "${PROJECT_BINARY_DIR}/include/glad/")
 
 add_executable(main ${main_SRC})
-if(EMSCRIPTEN)
-  target_link_libraries(main PUBLIC "-s USE_GLFW=3")
-endif()
 target_compile_definitions(main PUBLIC R3D_ASSIMP_SUPPORT)
 target_link_libraries(main PUBLIC raylib ${ASSIMP_LIBRARIES})
 if(EMSCRIPTEN)
   set_target_properties(main PROPERTIES OUTPUT_NAME index)
   target_compile_options(main PUBLIC "-matomics" -s USE_PTHREADS=1)
+  target_link_libraries(main PUBLIC "-s USE_GLFW=3")
   target_link_libraries(main PUBLIC IrrXML "--preload-file assets" "-s USE_PTHREADS=1" "-s PTHREAD_POOL_SIZE=8" "-Wl,--error-limit=0" "-s DISABLE_EXCEPTION_CATCHING=0" "-s TOTAL_MEMORY=512MB" "-matomics" "-s USE_ZLIB=1" "-s ALLOW_MEMORY_GROWTH=1" "-Wl,--whole-archive" "--source-map-base http://localhost:8000/")
+else()
+  target_compile_definitions(main PUBLIC IMGUI_IMPL_OPENGL_LOADER_GLAD)
 endif()
 target_link_libraries(main PUBLIC mc_rtc::mc_control_client mc_rtc::mc_control)
 target_include_directories(main PUBLIC

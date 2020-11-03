@@ -23,12 +23,18 @@
 #endif
 
 // Target FPS for the ticker
-constexpr size_t fps = 50;
+size_t fps = 50;
 
 static OrbitCamera * camera_ptr = nullptr;
 static Client * client_ptr = nullptr;
 static SceneState * state_ptr = nullptr;
 static ImGuiIO * io_ptr = nullptr;
+
+#ifdef __EMSCRIPTEN__
+static bool with_ticker = true;
+#else
+static bool with_ticker = true;
+#endif
 
 struct TickerLoopData
 {
@@ -88,8 +94,11 @@ void StartTicker()
       auto & data = *static_cast<TickerLoopData *>(dataPtr);
       if(!data.running)
       {
+        client_ptr->stop();
         data.gc = nullptr;
+#ifdef __EMSCRIPTEN__
         emscripten_cancel_main_loop();
+#endif
         return;
       }
       data.simulateSensors();
@@ -98,14 +107,29 @@ void StartTicker()
       {
         using duration_ms = std::chrono::duration<double, std::milli>;
         double dt = duration_ms(std::chrono::system_clock::now() - data.start_t).count();
-        mc_rtc::log::info("Controller running for {} seconds, real-time: {}", data.iter / fps, dt / 1000.0);
+        mc_rtc::log::info("Controller running for {} seconds, real-time: {}", data.iter * data.gc->timestep(),
+                          dt / 1000.0);
       }
     };
 
     data.iter = 0;
     data.gc = &gc;
     data.start_t = std::chrono::system_clock::now();
+    client_ptr->connect(gc.server(), *gc.controller().gui());
+    fps = static_cast<int>(1 / gc.timestep());
+    mc_rtc::log::info("Target background fps: {}", fps);
+#ifdef __EMSCRIPTEN__
     emscripten_set_main_loop_arg(loop_fn, &data, fps, 1);
+#else
+    while(data.running)
+    {
+      auto now = std::chrono::system_clock::now();
+      loop_fn(&data);
+      std::this_thread::sleep_until(now + std::chrono::milliseconds(static_cast<int>(1000 * gc.timestep())));
+    }
+    client_ptr->stop();
+    data.gc = nullptr;
+#endif
   });
   th.detach();
 }
@@ -134,18 +158,21 @@ void RenderLoop()
     state.mouseHandler = nullptr;
   }
 
-#ifndef __EMSCRIPTEN__
-  client.update(state);
-#else
-  if(data.gc)
+  if(with_ticker)
   {
-    client.update(state, data.gc->server(), *data.gc->controller().gui());
+    if(data.gc)
+    {
+      client.update(state);
+    }
+    else
+    {
+      client.clear();
+    }
   }
   else
   {
-    client.clear();
+    client.update(state);
   }
-#endif
   camera.update(state);
   //----------------------------------------------------------------------------------
 
@@ -168,34 +195,34 @@ void RenderLoop()
   DrawFPS(10, 10);
 
   client.draw2D();
-#ifndef __EMSCRIPTEN__
-  ImGui::ShowDemoWindow();
-#endif
-  ImGui::Begin("Ticker");
-  bool starting = data.gc == nullptr;
-  bool running = data.running;
-  if(running)
+  if(with_ticker)
   {
-    if(starting)
+    ImGui::Begin("Ticker");
+    bool starting = data.gc == nullptr;
+    bool running = data.running;
+    if(running)
     {
-      ImGui::Text("Controller starting up");
+      if(starting)
+      {
+        ImGui::Text("Controller starting up");
+      }
+      else
+      {
+        if(ImGui::Button("Stop"))
+        {
+          data.running = false;
+        }
+      }
     }
     else
     {
-      if(ImGui::Button("Stop"))
+      if(ImGui::Button("Start"))
       {
-        data.running = false;
+        StartTicker();
       }
     }
+    ImGui::End();
   }
-  else
-  {
-    if(ImGui::Button("Start"))
-    {
-      StartTicker();
-    }
-  }
-  ImGui::End();
   ImGui::Render();
   ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
@@ -224,7 +251,7 @@ int main(void)
   camera.fovy = 60.0f; // Camera field-of-view Y
   camera.type = CAMERA_PERSPECTIVE; // Camera mode type
 
-  Client client("ipc:///tmp/mc_rtc_pub.ipc", "ipc:///tmp/mc_rtc_rep.ipc", 1);
+  Client client;
   client_ptr = &client;
 
   SetCameraMode(camera, CAMERA_FREE); // Set a free camera mode
@@ -250,7 +277,15 @@ int main(void)
 
   mc_rtc::log::info("mc_rtc::version() {}", mc_rtc::version());
 
-  StartTicker();
+  if(with_ticker)
+  {
+    StartTicker();
+  }
+  else
+  {
+    client.connect("ipc:///tmp/mc_rtc_pub.ipc", "ipc:///tmp/mc_rtc_rep.ipc");
+    client.timeout(1.0);
+  }
 
 #ifdef __EMSCRIPTEN__
   emscripten_set_main_loop(RenderLoop, 0, 1);
