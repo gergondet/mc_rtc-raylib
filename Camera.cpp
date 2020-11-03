@@ -10,12 +10,12 @@ void OrbitCamera::update(SceneState & state)
   {
     return;
   }
-  if(GetMouseWheelMove() != 0)
+  float move = GetMouseWheelMove();
+  if(move != 0)
   {
     Vector3 direction = Vector3Normalize(Vector3Subtract(position, target));
-    int move = GetMouseWheelMove();
     float distance = Vector3Length(Vector3Subtract(target, position));
-    if(move > 0)
+    if(move < 0)
     {
       position = Vector3Add(position, Vector3Scale(direction, -0.1 * distance));
     }
