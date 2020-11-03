@@ -37,28 +37,31 @@ struct TransformBase : public Widget
     {
       marker_->update(state);
       pos_ = marker_->pose();
-      if constexpr(ctl == ControlAxis::TRANSLATION)
+      if(state.mouseHandler == marker_.get())
       {
-        client.send_request(requestId_, pos_.translation());
-      }
-      else if constexpr(ctl == ControlAxis::ROTATION)
-      {
-        client.send_request(requestId_, pos_.rotation());
-      }
-      else if constexpr(ctl == ControlAxis::ALL)
-      {
-        client.send_request(requestId_, pos_);
-      }
-      else if constexpr(ctl == ControlAxis::XYTHETA || ctl == ControlAxis::XYZTHETA)
-      {
-        Eigen::VectorXd data = Eigen::VectorXd::Zero(4);
-        const auto & t = pos_.translation();
-        auto yaw = mc_rbdyn::rpyFromMat(pos_.rotation()).z();
-        data(0) = t.x();
-        data(1) = t.y();
-        data(2) = yaw;
-        data(3) = t.z();
-        client.send_request(requestId_, data);
+        if constexpr(ctl == ControlAxis::TRANSLATION)
+        {
+          client.send_request(requestId_, pos_.translation());
+        }
+        else if constexpr(ctl == ControlAxis::ROTATION)
+        {
+          client.send_request(requestId_, pos_.rotation());
+        }
+        else if constexpr(ctl == ControlAxis::ALL)
+        {
+          client.send_request(requestId_, pos_);
+        }
+        else if constexpr(ctl == ControlAxis::XYTHETA || ctl == ControlAxis::XYZTHETA)
+        {
+          Eigen::VectorXd data = Eigen::VectorXd::Zero(4);
+          const auto & t = pos_.translation();
+          auto yaw = mc_rbdyn::rpyFromMat(pos_.rotation()).z();
+          data(0) = t.x();
+          data(1) = t.y();
+          data(2) = yaw;
+          data(3) = t.z();
+          client.send_request(requestId_, data);
+        }
       }
     }
   }
