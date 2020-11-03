@@ -134,6 +134,19 @@ void StartTicker()
   th.detach();
 }
 
+void EmptyRender()
+{
+  ImGui_ImplOpenGL3_NewFrame();
+  ImGui_ImplRaylib_NewFrame();
+  ImGui::NewFrame();
+  ImGui_ImplRaylib_ProcessEvent();
+  BeginDrawing();
+  ClearBackground(RAYWHITE);
+  ImGui::Render();
+  ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+  EndDrawing();
+}
+
 void RenderLoop()
 {
   static auto & camera = *camera_ptr;
@@ -160,7 +173,7 @@ void RenderLoop()
 
   if(with_ticker)
   {
-    if(data.gc)
+    if(data.running)
     {
       client.update(state);
     }
@@ -197,6 +210,17 @@ void RenderLoop()
   client.draw2D();
   if(with_ticker)
   {
+    auto left_margin = 15;
+    auto right_margin = 15;
+    auto top_margin = 50;
+    auto bottom_margin = 50;
+    auto width = GetScreenWidth() - left_margin - right_margin;
+    auto height = GetScreenHeight() - top_margin - bottom_margin;
+    auto w_width = 0.05 * width;
+    auto w_height = 0.1 * height;
+    ImGui::SetNextWindowPos(ImVec2(width + left_margin - w_width, height + top_margin - w_height),
+                            ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowSize(ImVec2(w_width, w_height), ImGuiCond_FirstUseEver);
     ImGui::Begin("Ticker");
     bool starting = data.gc == nullptr;
     bool running = data.running;
@@ -288,6 +312,8 @@ int main(void)
     client.timeout(1.0);
   }
 
+  // Make sure the window appears once before we start anything else
+  EmptyRender();
 #ifdef __EMSCRIPTEN__
   emscripten_set_main_loop(RenderLoop, 0, 1);
 #else

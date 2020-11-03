@@ -44,14 +44,24 @@ void Client::update(SceneState & state)
 
 void Client::draw2D()
 {
+  auto left_margin = 15;
+  auto top_margin = 50;
+  auto bottom_margin = 50;
+  auto width = GetScreenWidth() - left_margin;
+  auto height = GetScreenHeight() - top_margin - bottom_margin;
   if(!root_.empty())
   {
+    ImGui::SetNextWindowPos(ImVec2(left_margin, top_margin), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowSize(ImVec2(0.4 * width, 0.7 * height), ImGuiCond_FirstUseEver);
     ImGui::Begin("mc_rtc");
     root_.draw2D();
     ImGui::End();
   }
   if(sink_)
   {
+    auto w_height = 0.25 * height;
+    ImGui::SetNextWindowPos(ImVec2(left_margin, height + top_margin - w_height), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowSize(ImVec2(0.4 * width, w_height), ImGuiCond_FirstUseEver);
     ImGui::Begin("Console");
     for(const auto & m : sink_->msgs())
     {
