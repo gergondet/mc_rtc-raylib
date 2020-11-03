@@ -29,9 +29,10 @@ void Client::register_log_sink()
   if(!sink_)
   {
     sink_ = std::make_shared<LogSink>();
+    successSink_ = std::make_shared<SuccessSink>(sink_);
   }
   mc_rtc::log::details::info().sinks().push_back(sink_);
-  mc_rtc::log::details::success().sinks().push_back(sink_);
+  mc_rtc::log::details::success().sinks().push_back(successSink_);
   mc_rtc::log::details::cerr().sinks().push_back(sink_);
 }
 
@@ -54,8 +55,34 @@ void Client::draw2D()
     ImGui::Begin("Console");
     for(const auto & m : sink_->msgs())
     {
-      ImGui::Text(m.msg.c_str());
+      switch(m.level)
+      {
+        case LogSink::Level::SUCCESS:
+          ImGui::TextColored({50.0 / 255.0, 205.0 / 255.0, 50.0 / 255.0, 1}, "[success]");
+          ImGui::SameLine();
+          break;
+        case LogSink::Level::INFO:
+          ImGui::TextColored({0, 0, 1, 1}, "[info]");
+          ImGui::SameLine();
+          break;
+        case LogSink::Level::WARNING:
+          ImGui::TextColored({1, 0.5, 0, 1}, "[warning]");
+          ImGui::SameLine();
+          break;
+        case LogSink::Level::ERROR:
+          ImGui::TextColored({1, 0, 0, 1}, "[error]");
+          ImGui::SameLine();
+          break;
+        case LogSink::Level::CRITICAL:
+          ImGui::TextColored({1, 0, 0, 1}, "[CRITICAL]");
+          ImGui::SameLine();
+          break;
+        default:
+          break;
+      }
+      ImGui::Text("%s", m.msg.c_str());
     }
+    ImGui::SetScrollHereY(1.0f);
     ImGui::End();
   }
 }
@@ -79,6 +106,10 @@ void Client::clear()
 {
   root_.categories.clear();
   root_.widgets.clear();
+  if(sink_)
+  {
+    sink_->clear();
+  }
 }
 
 /** We rely on widgets to create categories */

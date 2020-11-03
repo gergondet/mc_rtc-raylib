@@ -44,7 +44,8 @@ struct Client : public mc_control::ControllerClient
   }
 
 private:
-  std::shared_ptr<LogSink> sink_;
+  LogSinkPtr sink_;
+  SuccessSinkPtr successSink_;
 
   std::vector<char> buffer_ = std::vector<char>(65535);
   std::chrono::system_clock::time_point t_last_ = std::chrono::system_clock::now();
