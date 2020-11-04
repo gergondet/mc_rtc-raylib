@@ -18,6 +18,7 @@ private:
     Model model;
     std::string name;
     float scale;
+    Color color;
     sva::PTransformd X_b_model;
     ~ModelData();
   };

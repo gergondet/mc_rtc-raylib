@@ -251,6 +251,11 @@ bfs::path convertURI(const std::string & uri)
     }
     return pkg / leaf;
   }
+  const std::string file = "file://";
+  if(uri.size() >= file.size() && uri.find(file) == 0)
+  {
+    return bfs::path(uri.substr(file.size()));
+  }
   return uri;
 }
 
@@ -271,8 +276,31 @@ BodyDrawer::BodyDrawer(const std::vector<rbd::parsers::Visual> & v, Shader * sha
     auto cwd = get_current_dir_name();
     chdir(path.parent_path().string().c_str());
 #endif
-    models_.emplace_back(new ModelData{LoadModelAdvanced(path.string().c_str()), path.leaf().string(),
-                                       static_cast<float>(mesh.scale), v.origin});
+    if(path.extension() == ".obj")
+    {
+      models_.emplace_back(new ModelData{LoadModel(path.string().c_str()), path.leaf().string(),
+                                         static_cast<float>(mesh.scale), WHITE, v.origin});
+    }
+    else
+    {
+      models_.emplace_back(new ModelData{LoadModelAdvanced(path.string().c_str()), path.leaf().string(),
+                                         static_cast<float>(mesh.scale), WHITE, v.origin});
+    }
+    if(v.material.type == rbd::parsers::Material::Type::COLOR)
+    {
+      const auto & c = boost::get<rbd::parsers::Material::Color>(v.material.data);
+      shader = nullptr;
+      models_.back()->color = ColorFromNormalized(
+          {static_cast<float>(c.r), static_cast<float>(c.g), static_cast<float>(c.b), static_cast<float>(c.a)});
+    }
+    else if(v.material.type == rbd::parsers::Material::Type::TEXTURE)
+    {
+      const auto & textureIn = boost::get<rbd::parsers::Material::Texture>(v.material.data);
+      auto filename = convertURI(textureIn.filename).string();
+      auto texture = LoadTexture(filename.c_str());
+      models_.back()->model.materials[0].maps[MAP_ALBEDO].texture = texture;
+      shader = nullptr;
+    }
     if(shader)
     {
       for(int i = 0; i < models_.back()->model.materialCount; ++i)
@@ -312,7 +340,7 @@ void BodyDrawer::draw()
 {
   for(const auto & m : models_)
   {
-    DrawModel(m->model, {0, 0, 0}, m->scale, WHITE);
+    DrawModel(m->model, {0, 0, 0}, m->scale, m->color);
   }
 }
 
