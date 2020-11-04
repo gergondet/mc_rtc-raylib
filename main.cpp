@@ -38,6 +38,7 @@ static bool with_ticker = true;
 
 struct TickerLoopData
 {
+  std::thread thread;
   bool running = true;
   size_t iter = 0;
   mc_control::MCGlobalController * gc = nullptr;
@@ -49,7 +50,7 @@ static TickerLoopData data;
 
 void StartTicker()
 {
-  std::thread th([]() {
+  data.thread = std::thread([]() {
     data.running = true;
     mc_control::MCGlobalController gc("/assets/etc/mc_rtc.yaml");
 
@@ -131,7 +132,9 @@ void StartTicker()
     data.gc = nullptr;
 #endif
   });
-  th.detach();
+#ifdef __EMSCRIPTEN__
+  data.thread.detach();
+#endif
 }
 
 void EmptyRender()
@@ -235,6 +238,10 @@ void RenderLoop()
         if(ImGui::Button("Stop"))
         {
           data.running = false;
+          if(data.thread.joinable())
+          {
+            data.thread.join();
+          }
         }
       }
     }
@@ -338,6 +345,12 @@ int main(void)
   //--------------------------------------------------------------------------------------
   CloseWindow(); // Close window and OpenGL context
   //--------------------------------------------------------------------------------------
+
+  if(data.thread.joinable())
+  {
+    data.running = false;
+    data.thread.join();
+  }
 
   return 0;
 }
