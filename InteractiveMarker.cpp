@@ -67,6 +67,7 @@ void InteractiveMarker::update(SceneState & state)
 {
   auto & camera = *state.camera;
   auto ray = GetMouseRay(GetMousePosition(), camera);
+  bool posCandidate = false;
   for(auto & c : posControls_)
   {
     if(state.hasMouse(&c))
@@ -96,6 +97,7 @@ void InteractiveMarker::update(SceneState & state)
     {
       c.hover = false;
       float distance = Vector3Length(Vector3Subtract(c.pose, ray.position));
+      posCandidate = true;
       state.attemptMouseCapture(&c, distance, [&c, &camera, this]() {
         c.hover = true;
         if(IsMouseButtonPressed(0))
@@ -143,6 +145,10 @@ void InteractiveMarker::update(SceneState & state)
     else
     {
       c.hover = false;
+      if(posCandidate)
+      {
+        continue;
+      }
       auto hit = GetCollisionRayModel(ray, c.torus);
       if(!hit.hit)
       {
