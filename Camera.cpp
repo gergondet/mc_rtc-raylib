@@ -6,7 +6,7 @@
 
 void OrbitCamera::update(SceneState & state)
 {
-  if(state.mouseHandler && state.mouseHandler != this)
+  if(!state.hasMouse(nullptr) && !state.hasMouse(this))
   {
     return;
   }
@@ -27,12 +27,12 @@ void OrbitCamera::update(SceneState & state)
   if(IsMouseButtonReleased(0))
   {
     rotate = false;
-    state.mouseHandler = nullptr;
+    state.releaseMouse(this);
   }
   if(IsMouseButtonReleased(2))
   {
     pan = false;
-    state.mouseHandler = nullptr;
+    state.releaseMouse(this);
   }
   if(pan || rotate)
   {
@@ -66,14 +66,18 @@ void OrbitCamera::update(SceneState & state)
   }
   if(IsMouseButtonPressed(0))
   {
-    rotate = true;
-    start = GetMousePosition();
-    state.mouseHandler = this;
+    state.attemptMouseCapture(this, std::numeric_limits<float>::max(), [this]() {
+      rotate = true;
+      start = GetMousePosition();
+      return true;
+    });
   }
   if(IsMouseButtonPressed(2))
   {
-    pan = true;
-    start = GetMousePosition();
-    state.mouseHandler = this;
+    state.attemptMouseCapture(this, std::numeric_limits<float>::max(), [this]() {
+      pan = true;
+      start = GetMousePosition();
+      return true;
+    });
   }
 }

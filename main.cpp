@@ -165,13 +165,14 @@ void RenderLoop()
   ShowCursor();
 #endif
 
-  if(io.WantCaptureMouse && state.mouseHandler == nullptr)
+  state.startUpdate();
+  if(io.WantCaptureMouse && !state.hasMouse(&io))
   {
-    state.mouseHandler = &io;
+    state.attemptMouseCapture(&io, -std::numeric_limits<float>::infinity(), []() { return true; });
   }
-  else if(!io.WantCaptureMouse && state.mouseHandler == &io)
+  else if(!io.WantCaptureMouse && state.hasMouse(&io))
   {
-    state.mouseHandler = nullptr;
+    state.releaseMouse(&io);
   }
 
   if(with_ticker)
@@ -190,6 +191,7 @@ void RenderLoop()
     client.update(state);
   }
   camera.update(state);
+  state.endUpdate();
   //----------------------------------------------------------------------------------
 
   // Draw

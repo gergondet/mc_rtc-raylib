@@ -69,30 +69,13 @@ void InteractiveMarker::update(SceneState & state)
   auto ray = GetMouseRay(GetMousePosition(), camera);
   for(auto & c : posControls_)
   {
-    c.hover = CheckCollisionRayBox(ray, c.bbox) && !active_;
-    if(!c.active)
-    {
-      if(IsMouseButtonPressed(0) && c.hover && state.mouseHandler == nullptr)
-      {
-        state.mouseHandler = this;
-        active_ = true;
-        c.active = true;
-        c.start = GetMousePosition();
-        Vector2 start = GetWorldToScreen(translation(pose_), camera);
-        Vector2 end = GetWorldToScreen(translation(sva::PTransformd(c.offset) * pose_), camera);
-        c.dir = Vector2Subtract(end, start);
-      }
-    }
-    else
+    if(state.hasMouse(&c))
     {
       if(IsMouseButtonReleased(0))
       {
-        if(c.active)
-        {
-          state.mouseHandler = nullptr;
-          active_ = false;
-        }
+        active_ = false;
         c.active = false;
+        state.releaseMouse(&c);
       }
       else
       {
@@ -109,34 +92,39 @@ void InteractiveMarker::update(SceneState & state)
         pose(offset * pose_);
       }
     }
-  }
-  for(auto & c : oriControls_)
-  {
-    auto hit = GetCollisionRayModel(ray, c.torus);
-    c.hover = hit.hit && !active_;
-    if(!c.active)
+    else if(CheckCollisionRayBox(ray, c.bbox))
     {
-      if(IsMouseButtonPressed(0) && c.hover && state.mouseHandler == nullptr)
-      {
-        state.mouseHandler = this;
-        active_ = true;
-        c.active = true;
-        c.pZ = Vector3Transform(c.normal, convert(pose_.rotation()));
-        Vector3 point = intersection(ray, c.pZ, translation(pose_));
-        c.pX = Vector3Normalize(Vector3Subtract(point, translation(pose_)));
-        c.pY = Vector3Normalize(Vector3CrossProduct(c.pZ, c.pX));
-      }
+      c.hover = false;
+      float distance = Vector3Length(Vector3Subtract(c.pose, ray.position));
+      state.attemptMouseCapture(&c, distance, [&c, &camera, this]() {
+        c.hover = true;
+        if(IsMouseButtonPressed(0))
+        {
+          active_ = true;
+          c.active = true;
+          c.start = GetMousePosition();
+          Vector2 start = GetWorldToScreen(translation(pose_), camera);
+          Vector2 end = GetWorldToScreen(translation(sva::PTransformd(c.offset) * pose_), camera);
+          c.dir = Vector2Subtract(end, start);
+          return true;
+        }
+        return false;
+      });
     }
     else
     {
+      c.hover = false;
+    }
+  }
+  for(auto & c : oriControls_)
+  {
+    if(state.hasMouse(&c))
+    {
       if(IsMouseButtonReleased(0))
       {
-        if(c.active)
-        {
-          active_ = false;
-          state.mouseHandler = nullptr;
-        }
+        active_ = false;
         c.active = false;
+        state.releaseMouse(&c);
       }
       else
       {
@@ -152,35 +140,56 @@ void InteractiveMarker::update(SceneState & state)
         c.pY = Vector3Normalize(Vector3CrossProduct(c.pZ, c.pX));
       }
     }
+    else
+    {
+      c.hover = false;
+      auto hit = GetCollisionRayModel(ray, c.torus);
+      if(!hit.hit)
+      {
+        continue;
+      }
+      state.attemptMouseCapture(&c, hit.distance, [&c, ray, this]() {
+        c.hover = true;
+        if(IsMouseButtonPressed(0))
+        {
+          active_ = true;
+          c.active = true;
+          c.pZ = Vector3Transform(c.normal, convert(pose_.rotation()));
+          Vector3 point = intersection(ray, c.pZ, translation(pose_));
+          c.pX = Vector3Normalize(Vector3Subtract(point, translation(pose_)));
+          c.pY = Vector3Normalize(Vector3CrossProduct(c.pZ, c.pX));
+          return true;
+        }
+        return false;
+      });
+    }
   }
 }
 
 void InteractiveMarker::draw()
 {
+  auto transparent = [](Color c) { return Color{c.r, c.g, c.b, 128}; };
+  auto color = [transparent](auto & c) {
+    if(c.hover || c.active)
+    {
+      return c.color;
+    }
+    return transparent(c.color);
+  };
   for(auto & c : posControls_)
   {
-    DrawCube(c.pose, size, size, size, c.color);
+    DrawCube(c.pose, size, size, size, color(c));
     if(c.hover || c.active)
     {
       DrawCubeWires(c.pose, size, size, size, c.active ? WHITE : GRAY);
     }
-    if(c.active)
-    {
-      DrawCubeWires(c.pose, size, size, size, WHITE);
-    }
   }
   for(auto & c : oriControls_)
   {
-    DrawModel(c.torus, Vector3Zero(), 1.0f, c.color);
+    DrawModel(c.torus, Vector3Zero(), 1.0f, color(c));
     if(c.hover || c.active)
     {
       DrawModelWires(c.torus, Vector3Zero(), 1.0f, c.active ? WHITE : GRAY);
-      if(c.active)
-      {
-        DrawLine3D(translation(pose_), Vector3Add(translation(pose_), c.pX), RED);
-        DrawLine3D(translation(pose_), Vector3Add(translation(pose_), c.pY), GREEN);
-        DrawLine3D(translation(pose_), Vector3Add(translation(pose_), c.pZ), BLUE);
-      }
     }
   }
 }

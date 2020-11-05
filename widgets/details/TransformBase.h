@@ -37,7 +37,7 @@ struct TransformBase : public Widget
     {
       marker_->update(state);
       pos_ = marker_->pose();
-      if(state.mouseHandler == marker_.get())
+      if(marker_->active())
       {
         if constexpr(ctl == ControlAxis::TRANSLATION)
         {

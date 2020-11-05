@@ -66,6 +66,7 @@ set(main_SRC
   Client.h
   Client.cpp
   SceneState.h
+  SceneState.cpp
   widgets/Category.h
   widgets/Category.cpp
   widgets/Widget.h
