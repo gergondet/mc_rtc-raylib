@@ -52,7 +52,11 @@ void StartTicker()
 {
   data.thread = std::thread([]() {
     data.running = true;
+#ifdef __EMSCRIPTEN__
     mc_control::MCGlobalController gc("/assets/etc/mc_rtc.yaml");
+#else
+    mc_control::MCGlobalController gc;
+#endif
 
     const auto & mb = gc.robot().mb();
     const auto & mbc = gc.robot().mbc();
