@@ -22,6 +22,9 @@
 #  include <emscripten/emscripten.h>
 #endif
 
+#include <boost/filesystem.hpp>
+namespace bfs = boost::filesystem;
+
 // Target FPS for the ticker
 size_t fps = 50;
 
@@ -44,6 +47,8 @@ struct TickerLoopData
   mc_control::MCGlobalController * gc = nullptr;
   std::function<void()> simulateSensors;
   std::chrono::system_clock::time_point start_t;
+  bfs::path temp_directory;
+  std::string MainRobot;
 };
 
 static TickerLoopData data;
@@ -52,11 +57,7 @@ void StartTicker()
 {
   data.thread = std::thread([]() {
     data.running = true;
-#ifdef __EMSCRIPTEN__
-    mc_control::MCGlobalController gc("/assets/etc/mc_rtc.yaml");
-#else
-    mc_control::MCGlobalController gc;
-#endif
+    mc_control::MCGlobalController gc((data.temp_directory / "mc_rtc.yaml").string());
 
     const auto & mb = gc.robot().mb();
     const auto & mbc = gc.robot().mbc();
@@ -246,6 +247,8 @@ void RenderLoop()
       {
         if(ImGui::Button("Stop"))
         {
+          data.gc->configuration().config.save((data.temp_directory / "mc_rtc.yaml").string());
+          data.MainRobot = static_cast<std::string>(data.gc->configuration().config("MainRobot"));
           data.running = false;
           if(data.thread.joinable())
           {
@@ -256,6 +259,27 @@ void RenderLoop()
     }
     else
     {
+      static auto robots = mc_rbdyn::RobotLoader::available_robots();
+      if(ImGui::BeginCombo("MainRobot", data.MainRobot.c_str()))
+      {
+        for(const auto & r : robots)
+        {
+          bool active = r == data.MainRobot;
+          if(ImGui::Selectable(r.c_str(), active))
+          {
+            data.MainRobot = r;
+            auto c_path = (data.temp_directory / "mc_rtc.yaml").string();
+            mc_rtc::Configuration config(c_path);
+            config.add("MainRobot", data.MainRobot);
+            config.save(c_path);
+          }
+          if(active)
+          {
+            ImGui::SetItemDefaultFocus();
+          }
+        }
+        ImGui::EndCombo();
+      }
       if(ImGui::Button("Start"))
       {
         StartTicker();
@@ -276,6 +300,13 @@ int main(void)
   //--------------------------------------------------------------------------------------
   const int screenWidth = 1600;
   const int screenHeight = 900;
+
+#ifndef __EMSCRIPTEN__
+  data.temp_directory = bfs::temp_directory_path() / bfs::unique_path();
+  bfs::create_directories(data.temp_directory);
+#else
+  data.temp_directory = bfs::path("/assets/etc");
+#endif
 
   SetConfigFlags(FLAG_MSAA_4X_HINT); // Enable Multi Sampling Anti Aliasing 4x (if available)
   SetConfigFlags(FLAG_WINDOW_RESIZABLE);
@@ -360,6 +391,10 @@ int main(void)
     data.running = false;
     data.thread.join();
   }
+
+#ifndef __EMSCRIPTEN__
+  bfs::remove_all(data.temp_directory);
+#endif
 
   return 0;
 }
