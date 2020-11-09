@@ -96,6 +96,10 @@ else()
   target_compile_definitions(main PUBLIC IMGUI_IMPL_OPENGL_LOADER_GLAD)
 endif()
 target_link_libraries(main PUBLIC mc_rtc::mc_control_client mc_rtc::mc_control)
+if(TARGET mc_rtc::mc_rtc_ros)
+  target_compile_definitions(main PUBLIC MC_RTC_HAS_ROS_SUPPORT)
+  target_link_libraries(main PUBLIC mc_rtc::mc_rtc_ros)
+endif()
 target_include_directories(main PUBLIC
   ${ASSIMP_INCLUDE_DIRS}
   "${PROJECT_SOURCE_DIR}/raylib-3D"

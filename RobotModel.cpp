@@ -14,6 +14,10 @@
 #include <boost/filesystem.hpp>
 namespace bfs = boost::filesystem;
 
+#ifdef MC_RTC_HAS_ROS_SUPPORT
+#  include <ros/package.h>
+#endif
+
 std::string GOOSH_VERTEX_SHADER_ES = R"(
 #version 100
 
@@ -234,7 +238,8 @@ bfs::path convertURI(const std::string & uri)
     std::string pkg = uri.substr(package.size(), split - package.size());
     auto leaf = bfs::path(uri.substr(split + 1));
     bfs::path MC_ENV_DESCRIPTION_PATH(mc_rtc::MC_ENV_DESCRIPTION_PATH);
-    // FIXME Use ROS if available, prompt the user otherwise
+#ifndef MC_RTC_HAS_ROS_SUPPORT
+    // FIXME Prompt the user for unknown packages
     if(pkg == "jvrc_description")
     {
       pkg = (MC_ENV_DESCRIPTION_PATH / ".." / "jvrc_description").string();
@@ -251,6 +256,9 @@ bfs::path convertURI(const std::string & uri)
     {
       mc_rtc::log::critical("Cannot resolve package: {}", pkg);
     }
+#else
+    pkg = ros::package::getPath(pkg);
+#endif
     return pkg / leaf;
   }
   const std::string file = "file://";
