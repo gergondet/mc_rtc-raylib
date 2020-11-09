@@ -125,6 +125,7 @@ varying vec3 fragNormal;
 uniform sampler2D texture0;
 uniform vec4 colDiffuse;
 uniform vec3 viewPos;
+uniform vec3 targetPos;
 
 vec4 gooch_shading(vec4 m_color, //color of the mesh
                    float m_shine, //shininess of the surface
@@ -134,14 +135,14 @@ vec4 gooch_shading(vec4 m_color, //color of the mesh
 {
     //diffuse
     float kd = 1.0;
-    float a = 0.2;
-    float b = 0.6;
+    float a = 0.1;
+    float b = 0.9;
 
     float NL = dot(normalize(v_normal), normalize(l_direction));
 
     float it = ((1.0 + NL) / 2.0);
-    vec3 color = (1.0-it) * (vec3(0.0, 0.0, 0.4) + a*m_color.xyz)
-               +  it * (vec3(0.4, 0.4, 0.0) + b*m_color.xyz);
+    vec3 color = (1.0-it) * (vec3(0.0, 0.0, 0.2) + a*m_color.xyz)
+               +  it * (vec3(0.2, 0.2, 0.0) + b*m_color.xyz);
 
     //Highlights
     vec3 R = reflect( -normalize(l_direction),
@@ -159,10 +160,10 @@ void main()
 {
   gl_FragColor = texture2D(texture0, fragTexCoord) * colDiffuse * fragColor;
   gl_FragColor = gooch_shading(gl_FragColor,
-                               0.5,
+                               10.0,
                                vec3(0, 0, 1),
                                fragNormal,
-                               normalize(viewPos));
+                               normalize(viewPos - targetPos));
 }
 )";
 
@@ -179,6 +180,7 @@ in vec3 fragNormal;
 uniform sampler2D texture0;
 uniform vec4 colDiffuse;
 uniform vec3 viewPos;
+uniform vec3 targetPos;
 
 // Output color
 out vec4 finalColor;
@@ -191,14 +193,14 @@ vec4 gooch_shading(vec4 m_color, //color of the mesh
 {
     //diffuse
     float kd = 1;
-    float a = 0.2;
-    float b = 0.6;
+    float a = 0.1;
+    float b = 0.9;
 
     float NL = dot(normalize(v_normal), normalize(l_direction));
 
     float it = ((1 + NL) / 2);
-    vec3 color = (1-it) * (vec3(0, 0, 0.4) + a*m_color.xyz)
-               +  it * (vec3(0.4, 0.4, 0) + b*m_color.xyz);
+    vec3 color = (1-it) * (vec3(0, 0, 0.2) + a*m_color.xyz)
+               +  it * (vec3(0.2, 0.2, 0) + b*m_color.xyz);
 
     //Highlights
     vec3 R = reflect( -normalize(l_direction),
@@ -216,10 +218,10 @@ void main()
 {
   finalColor = texture(texture0, fragTexCoord) * colDiffuse * fragColor;
   finalColor = gooch_shading(finalColor,
-                             0.5,
+                             10.0,
                              vec3(0, 0, 1),
                              fragNormal,
-                             normalize(viewPos));
+                             normalize(viewPos - targetPos));
 }
 )";
 
@@ -276,7 +278,7 @@ BodyDrawer::BodyDrawer(const std::vector<rbd::parsers::Visual> & v, Shader * sha
     auto cwd = get_current_dir_name();
     chdir(path.parent_path().string().c_str());
 #endif
-    if(path.extension() == ".obj")
+    if(path.extension() == ".obj" || path.extension() == ".gltf" || path.extension() == ".glb")
     {
       models_.emplace_back(new ModelData{LoadModel(path.string().c_str()), path.leaf().string(),
                                          static_cast<float>(mesh.scale), WHITE, v.origin});
@@ -289,9 +291,13 @@ BodyDrawer::BodyDrawer(const std::vector<rbd::parsers::Visual> & v, Shader * sha
     if(v.material.type == rbd::parsers::Material::Type::COLOR)
     {
       const auto & c = boost::get<rbd::parsers::Material::Color>(v.material.data);
-      shader = nullptr;
-      models_.back()->color = ColorFromNormalized(
-          {static_cast<float>(c.r), static_cast<float>(c.g), static_cast<float>(c.b), static_cast<float>(c.a)});
+      auto isWhite = [&]() { return c.r == c.g && c.g == c.b && c.b == c.a && c.a == 1.0; };
+      if(!isWhite())
+      {
+        shader = nullptr;
+        models_.back()->color = ColorFromNormalized(
+            {static_cast<float>(c.r), static_cast<float>(c.g), static_cast<float>(c.b), static_cast<float>(c.a)});
+      }
     }
     else if(v.material.type == rbd::parsers::Material::Type::TEXTURE)
     {
@@ -380,6 +386,8 @@ void RobotModel::draw(Camera camera)
 {
   float cameraPos[3] = {camera.position.x, camera.position.y, camera.position.z};
   SetShaderValue(shader_, shader_.locs[LOC_VECTOR_VIEW], cameraPos, UNIFORM_VEC3);
+  float targetPos[3] = {camera.target.x, camera.target.y, camera.target.z};
+  SetShaderValue(shader_, GetShaderLocation(shader_, "targetPos"), targetPos, UNIFORM_VEC3);
   for(auto & b : bodies_)
   {
     b.draw();
