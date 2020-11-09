@@ -86,8 +86,11 @@ void StartTicker()
       }
       gc.setEncoderValues(qEnc);
       gc.setEncoderVelocities(alphaEnc);
-      gc.setSensorPositions({{"FloatingBase", robot.posW().translation()}});
-      gc.setSensorOrientations({{"FloatingBase", Eigen::Quaterniond{robot.posW().rotation()}}});
+      if(robot.hasBodySensor("FloatingBase"))
+      {
+        gc.setSensorPositions({{"FloatingBase", robot.posW().translation()}});
+        gc.setSensorOrientations({{"FloatingBase", Eigen::Quaterniond{robot.posW().rotation()}}});
+      }
     };
     data.simulateSensors = simulateSensors;
 
