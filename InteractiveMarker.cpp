@@ -193,9 +193,9 @@ void InteractiveMarker::draw()
   for(auto & c : oriControls_)
   {
     DrawModel(c.torus, Vector3Zero(), 1.0f, color(c));
-    if(c.hover || c.active)
+    if(c.active)
     {
-      DrawModelWires(c.torus, Vector3Zero(), 1.0f, c.active ? WHITE : GRAY);
+      DrawModelWires(c.torus, Vector3Zero(), 1.0f, WHITE);
     }
   }
 }
