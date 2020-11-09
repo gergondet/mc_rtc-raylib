@@ -24,6 +24,7 @@ if(EMSCRIPTEN)
   file(COPY etc/mc_rtc.yaml DESTINATION ${PROJECT_BINARY_DIR}/assets/etc/)
   file(COPY ${JVRC_DESCRIPTION_PATH} DESTINATION ${PROJECT_BINARY_DIR}/assets/)
   file(COPY ${MC_ENV_DESCRIPTION_PATH} DESTINATION ${PROJECT_BINARY_DIR}/assets/)
+  file(COPY ${MC_RTC_BINDIR}/../share/doc/mc_rtc/json/schemas DESTINATION ${PROJECT_BINARY_DIR}/assets/)
 endif()
 
 find_package(assimp REQUIRED)

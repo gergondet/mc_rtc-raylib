@@ -4,6 +4,28 @@
 
 #include <mc_rtc/config.h>
 
+namespace details
+{
+
+bfs::path current_path()
+{
+  auto cwd = get_current_dir_name();
+  bfs::path out(cwd);
+  free(cwd);
+  return out;
+}
+
+bfs::path canonical(const bfs::path & p)
+{
+#ifndef __EMSCRIPTEN__
+  return bfs::canonical(p);
+#else
+  return bfs::canonical(p, current_path());
+#endif
+}
+
+} // namespace details
+
 namespace
 {
 
@@ -39,7 +61,7 @@ void resolveRef(const bfs::path & path,
     {
       if(k == "$ref")
       {
-        auto ref = loadFn(bfs::canonical(path.parent_path() / removeFakeDir(conf(k)).c_str()));
+        auto ref = loadFn(details::canonical(path.parent_path() / removeFakeDir(conf(k)).c_str()));
         auto refKeys = ref.keys();
         for(const auto & rk : refKeys)
         {
@@ -150,7 +172,11 @@ void Schema::data(const std::string & schema)
   }
   form_.reset(nullptr);
   schema_ = schema;
+#ifndef __EMSCRIPTEN__
   bfs::path all_schemas = bfs::path(mc_rtc::INSTALL_PREFIX) / "share" / "doc" / "mc_rtc" / "json" / "schemas";
+#else
+  bfs::path all_schemas = bfs::path("/assets/schemas");
+#endif
   bfs::path schema_dir = all_schemas / schema_.c_str();
   if(!bfs::exists(schema_dir) || !bfs::is_directory(schema_dir))
   {
@@ -209,9 +235,9 @@ std::optional<std::string> Schema::value(const std::string & name) const
 
 mc_rtc::Configuration & Schema::loadSchema(const bfs::path & path)
 {
-  if(bfs::canonical(path) != path)
+  if(details::canonical(path) != path)
   {
-    return loadSchema(bfs::canonical(path));
+    return loadSchema(details::canonical(path));
   }
   if(all_schemas_.count(path.string()))
   {
