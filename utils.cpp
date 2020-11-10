@@ -3,6 +3,8 @@
 #include "raylib.h"
 #include "rlgl.h"
 
+#include "imgui.h"
+
 Matrix convert(const sva::PTransformd & pt)
 {
   auto mat = sva::conversions::toHomogeneous(pt.cast<float>());
@@ -184,4 +186,32 @@ void DrawFrame(const sva::PTransformd & pose)
   DrawArrow(p0, px, 0.15 * 0.15, 0.15 * 0.15, 0.5 * 0.15, RED);
   DrawArrow(p0, py, 0.15 * 0.15, 0.15 * 0.15, 0.5 * 0.15, GREEN);
   DrawArrow(p0, pz, 0.15 * 0.15, 0.15 * 0.15, 0.5 * 0.15, BLUE);
+}
+
+void Combo(const char * label,
+           const std::vector<std::string> & values,
+           const std::string & current,
+           std::function<void(const std::string &)> callback)
+{
+  if(ImGui::BeginCombo(label, current.c_str()))
+  {
+    for(const auto & v : values)
+    {
+      bool active = v == current;
+      if(ImGui::Selectable(v.c_str(), active))
+      {
+        callback(v);
+      }
+      if(active)
+      {
+        ImGui::SetItemDefaultFocus();
+      }
+    }
+    ImGui::EndCombo();
+  }
+}
+
+void Combo(const char * label, const std::vector<std::string> & values, std::string & current)
+{
+  Combo(label, values, current, [&current](const std::string & v) { current = v; });
 }

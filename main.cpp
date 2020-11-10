@@ -39,6 +39,16 @@ static bool with_ticker = true;
 static bool with_ticker = true;
 #endif
 
+struct TickerConfiguration
+{
+  bfs::path directory;
+  mc_rtc::Configuration config;
+  std::string MainRobot;
+  std::string Enabled;
+  std::vector<std::string> robots;
+  std::vector<std::string> controllers;
+};
+
 struct TickerLoopData
 {
   std::thread thread;
@@ -47,8 +57,7 @@ struct TickerLoopData
   mc_control::MCGlobalController * gc = nullptr;
   std::function<void()> simulateSensors;
   std::chrono::system_clock::time_point start_t;
-  bfs::path temp_directory;
-  std::string MainRobot;
+  TickerConfiguration config;
 };
 
 static TickerLoopData data;
@@ -57,7 +66,8 @@ void StartTicker()
 {
   data.thread = std::thread([]() {
     data.running = true;
-    mc_control::MCGlobalController gc((data.temp_directory / "mc_rtc.yaml").string());
+    mc_control::MCGlobalController gc((data.config.directory / "mc_rtc.yaml").string());
+    data.config.config = gc.configuration().config;
 
     const auto & mb = gc.robot().mb();
     const auto & mbc = gc.robot().mbc();
@@ -247,8 +257,11 @@ void RenderLoop()
       {
         if(ImGui::Button("Stop"))
         {
-          data.gc->configuration().config.save((data.temp_directory / "mc_rtc.yaml").string());
-          data.MainRobot = static_cast<std::string>(data.gc->configuration().config("MainRobot"));
+          data.config.config = data.gc->configuration().config;
+          data.config.MainRobot = static_cast<std::string>(data.config.config("MainRobot"));
+          data.config.Enabled = static_cast<std::string>(data.gc->current_controller());
+          data.config.robots = mc_rbdyn::RobotLoader::available_robots();
+          data.config.controllers = data.gc->loaded_controllers();
           data.running = false;
           if(data.thread.joinable())
           {
@@ -259,29 +272,15 @@ void RenderLoop()
     }
     else
     {
-      static auto robots = mc_rbdyn::RobotLoader::available_robots();
-      if(ImGui::BeginCombo("MainRobot", data.MainRobot.c_str()))
-      {
-        for(const auto & r : robots)
-        {
-          bool active = r == data.MainRobot;
-          if(ImGui::Selectable(r.c_str(), active))
-          {
-            data.MainRobot = r;
-            auto c_path = (data.temp_directory / "mc_rtc.yaml").string();
-            mc_rtc::Configuration config(c_path);
-            config.add("MainRobot", data.MainRobot);
-            config.save(c_path);
-          }
-          if(active)
-          {
-            ImGui::SetItemDefaultFocus();
-          }
-        }
-        ImGui::EndCombo();
-      }
+      Combo("Robot", data.config.robots, data.config.MainRobot);
+      Combo("Controller", data.config.controllers, data.config.Enabled);
       if(ImGui::Button("Start"))
       {
+        auto c_path = (data.config.directory / "mc_rtc.yaml").string();
+        mc_rtc::Configuration config(c_path);
+        config.add("MainRobot", data.config.MainRobot);
+        config.add("Enabled", data.config.Enabled);
+        config.save(c_path);
         StartTicker();
       }
     }
@@ -302,8 +301,8 @@ int main(void)
   const int screenHeight = 900;
 
 #ifndef __EMSCRIPTEN__
-  data.temp_directory = bfs::temp_directory_path() / bfs::unique_path();
-  bfs::create_directories(data.temp_directory);
+  data.config.directory = bfs::temp_directory_path() / bfs::unique_path();
+  bfs::create_directories(data.config.directory);
 #else
   data.temp_directory = bfs::path("/assets/etc");
 #endif
@@ -393,7 +392,7 @@ int main(void)
   }
 
 #ifndef __EMSCRIPTEN__
-  bfs::remove_all(data.temp_directory);
+  bfs::remove_all(data.config.directory);
 #endif
 
   return 0;

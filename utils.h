@@ -55,3 +55,12 @@ void DrawCylinderEx(Vector3 position,
 void DrawArrow(Vector3 p0, Vector3 p1, float shaft_diam, float head_diam, float head_len, Color color);
 
 void DrawFrame(const sva::PTransformd & pose);
+
+/** Helper for ImGui::Combo with a vector of strings */
+void Combo(const char * label, const std::vector<std::string> & values, std::string & current);
+
+/** Helper for ImGui::Combo with a vector of strings */
+void Combo(const char * label,
+           const std::vector<std::string> & values,
+           const std::string & current,
+           std::function<void(const std::string &)> callback);
