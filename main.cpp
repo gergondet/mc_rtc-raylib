@@ -311,7 +311,7 @@ int main(void)
   data.config.directory = bfs::temp_directory_path() / bfs::unique_path();
   bfs::create_directories(data.config.directory);
 #else
-  data.temp_directory = bfs::path("/assets/etc");
+  data.config.directory = bfs::path("/assets/etc");
 #endif
 
   SetConfigFlags(FLAG_MSAA_4X_HINT); // Enable Multi Sampling Anti Aliasing 4x (if available)
