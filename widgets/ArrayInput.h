@@ -19,7 +19,7 @@ struct ArrayInput : public Widget
 
   inline void draw2D() override
   {
-    int flags = busy_ ? ImGuiInputTextFlags_EnterReturnsTrue : ImGuiInputTextFlags_ReadOnly;
+    int flags = busy_ ? ImGuiInputTextFlags_None : ImGuiInputTextFlags_ReadOnly;
     int columns = labels_.size() ? 3 : 2;
     double * source = busy_ ? buffer_.data() : data_.data();
     bool edit_done_ = false;
@@ -38,7 +38,11 @@ struct ArrayInput : public Widget
     }
     for(int i = 0; i < data_.size(); ++i)
     {
-      edit_done_ = ImGui::InputDouble(label("", i).c_str(), &source[i], 0.0, 0.0, "%.6g", flags) || edit_done_;
+      ImGui::InputDouble(label("", i).c_str(), &source[i], 0.0, 0.0, "%.6g", flags);
+      edit_done_ = edit_done_
+                   || (ImGui::IsItemDeactivatedAfterEdit()
+                       && (ImGui::IsKeyPressed(ImGui::GetIO().KeyMap[ImGuiKey_Enter])
+                           || ImGui::IsKeyPressed(ImGui::GetIO().KeyMap[ImGuiKey_KeyPadEnter])));
     }
     if(edit_done_)
     {
