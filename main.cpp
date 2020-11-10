@@ -57,6 +57,7 @@ struct TickerLoopData
   mc_control::MCGlobalController * gc = nullptr;
   std::function<void()> simulateSensors;
   std::chrono::system_clock::time_point start_t;
+  double ratio = 1.0;
   TickerConfiguration config;
 };
 
@@ -122,13 +123,10 @@ void StartTicker()
       }
       data.simulateSensors();
       data.gc->run();
-      if(++data.iter % fps == 0)
-      {
-        using duration_ms = std::chrono::duration<double, std::milli>;
-        double dt = duration_ms(std::chrono::system_clock::now() - data.start_t).count();
-        mc_rtc::log::info("Controller running for {} seconds, real-time: {}", data.iter * data.gc->timestep(),
-                          dt / 1000.0);
-      }
+      double sim_t = data.iter++ * data.gc->timestep();
+      using duration_ms = std::chrono::duration<double, std::milli>;
+      double real_t = duration_ms(std::chrono::system_clock::now() - data.start_t).count() / 1000.0;
+      data.ratio = sim_t / real_t;
     };
 
     data.iter = 0;
@@ -142,9 +140,10 @@ void StartTicker()
 #else
     while(data.running)
     {
-      auto now = std::chrono::system_clock::now();
+      auto next =
+          std::chrono::system_clock::now() + std::chrono::microseconds(static_cast<int>(1000 * 1000 * gc.timestep()));
       loop_fn(&data);
-      std::this_thread::sleep_until(now + std::chrono::milliseconds(static_cast<int>(1000 * gc.timestep())));
+      std::this_thread::sleep_until(next);
     }
     client_ptr->stop();
     data.gc = nullptr;
@@ -228,7 +227,14 @@ void RenderLoop()
 
   EndMode3D();
 
-  DrawFPS(10, 10);
+  if(!with_ticker)
+  {
+    DrawFPS(10, 10);
+  }
+  else
+  {
+    DrawText(TextFormat("%2i FPS | %0.2f Sim/Real", GetFPS(), data.ratio), 10, 10, 20, LIME);
+  }
 
   client.draw2D();
   if(with_ticker)
@@ -263,6 +269,7 @@ void RenderLoop()
           data.config.robots = mc_rbdyn::RobotLoader::available_robots();
           data.config.controllers = data.gc->loaded_controllers();
           data.running = false;
+          data.ratio = 1.0;
           if(data.thread.joinable())
           {
             data.thread.join();
