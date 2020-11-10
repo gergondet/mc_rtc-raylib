@@ -299,13 +299,8 @@ BodyDrawer::BodyDrawer(const std::vector<rbd::parsers::Visual> & v, Shader * sha
     if(v.material.type == rbd::parsers::Material::Type::COLOR)
     {
       const auto & c = boost::get<rbd::parsers::Material::Color>(v.material.data);
-      auto isWhite = [&]() { return c.r == c.g && c.g == c.b && c.b == c.a && c.a == 1.0; };
-      if(!isWhite())
-      {
-        shader = nullptr;
-        models_.back()->color = ColorFromNormalized(
-            {static_cast<float>(c.r), static_cast<float>(c.g), static_cast<float>(c.b), static_cast<float>(c.a)});
-      }
+      models_.back()->color = ColorFromNormalized(
+          {static_cast<float>(c.r), static_cast<float>(c.g), static_cast<float>(c.b), static_cast<float>(c.a)});
     }
     else if(v.material.type == rbd::parsers::Material::Type::TEXTURE)
     {
@@ -313,7 +308,6 @@ BodyDrawer::BodyDrawer(const std::vector<rbd::parsers::Visual> & v, Shader * sha
       auto filename = convertURI(textureIn.filename).string();
       auto texture = LoadTexture(filename.c_str());
       models_.back()->model.materials[0].maps[MAP_ALBEDO].texture = texture;
-      shader = nullptr;
     }
     if(shader)
     {
