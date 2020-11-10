@@ -3,6 +3,17 @@
 #include "raylib.h"
 #include "rlgl.h"
 
+#define PAR_MALLOC(T, N) ((T *)RL_MALLOC(N * sizeof(T)))
+#define PAR_CALLOC(T, N) ((T *)RL_CALLOC(N * sizeof(T), 1))
+#define PAR_REALLOC(T, BUF, N) ((T *)RL_REALLOC(BUF, sizeof(T) * (N)))
+#define PAR_FREE RL_FREE
+
+#include "raylib/src/external/par_shapes.h"
+
+#ifndef DEFAULT_MESH_VERTEX_BUFFERS
+#  define DEFAULT_MESH_VERTEX_BUFFERS 7
+#endif
+
 #include "imgui.h"
 
 Matrix convert(const sva::PTransformd & pt)
@@ -214,4 +225,58 @@ void Combo(const char * label,
 void Combo(const char * label, const std::vector<std::string> & values, std::string & current)
 {
   Combo(label, values, current, [&current](const std::string & v) { current = v; });
+}
+
+Mesh GenMeshCylinderROS(float radius, float height, int slices)
+{
+  Mesh mesh = {};
+  mesh.vboId = (unsigned int *)RL_CALLOC(DEFAULT_MESH_VERTEX_BUFFERS, sizeof(unsigned int));
+
+  // Generate the cylinder body
+  par_shapes_mesh * cylinder = par_shapes_create_cylinder(slices, 8);
+  par_shapes_scale(cylinder, radius, radius, height);
+  par_shapes_translate(cylinder, 0, 0, -height / 2);
+
+  // Generate an orientable disk shape (top cap)
+  float cap_center[3] = {0, 0, height / 2};
+  float cap_normal[3] = {0, 0, 1};
+  par_shapes_mesh * capTop = par_shapes_create_disk(radius, slices, cap_center, cap_normal);
+  capTop->tcoords = PAR_MALLOC(float, 2 * capTop->npoints);
+  for(int i = 0; i < 2 * capTop->npoints; i++) capTop->tcoords[i] = 0.0f;
+
+  par_shapes_merge(cylinder, capTop);
+
+  // Generate an orientable disk shape (bottom cap)
+  float rot_axis[3] = {1, 0, 0};
+  par_shapes_rotate(capTop, M_PI, rot_axis);
+
+  par_shapes_merge_and_free(cylinder, capTop);
+
+  mesh.vertices = (float *)RL_MALLOC(cylinder->ntriangles * 3 * 3 * sizeof(float));
+  mesh.texcoords = (float *)RL_MALLOC(cylinder->ntriangles * 3 * 2 * sizeof(float));
+  mesh.normals = (float *)RL_MALLOC(cylinder->ntriangles * 3 * 3 * sizeof(float));
+
+  mesh.vertexCount = cylinder->ntriangles * 3;
+  mesh.triangleCount = cylinder->ntriangles;
+
+  for(int k = 0; k < mesh.vertexCount; k++)
+  {
+    mesh.vertices[k * 3] = cylinder->points[cylinder->triangles[k] * 3];
+    mesh.vertices[k * 3 + 1] = cylinder->points[cylinder->triangles[k] * 3 + 1];
+    mesh.vertices[k * 3 + 2] = cylinder->points[cylinder->triangles[k] * 3 + 2];
+
+    mesh.normals[k * 3] = cylinder->normals[cylinder->triangles[k] * 3];
+    mesh.normals[k * 3 + 1] = cylinder->normals[cylinder->triangles[k] * 3 + 1];
+    mesh.normals[k * 3 + 2] = cylinder->normals[cylinder->triangles[k] * 3 + 2];
+
+    mesh.texcoords[k * 2] = cylinder->tcoords[cylinder->triangles[k] * 2];
+    mesh.texcoords[k * 2 + 1] = cylinder->tcoords[cylinder->triangles[k] * 2 + 1];
+  }
+
+  par_shapes_free_mesh(cylinder);
+
+  // Upload vertex data to GPU (static mesh)
+  rlLoadMesh(&mesh, false);
+
+  return mesh;
 }

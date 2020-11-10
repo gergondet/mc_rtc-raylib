@@ -276,6 +276,28 @@ BodyDrawer::ModelData::~ModelData()
 
 BodyDrawer::BodyDrawer(const std::vector<rbd::parsers::Visual> & v, Shader * shader)
 {
+  auto applyMaterial = [shader](const rbd::parsers::Visual & v, ModelData & data) {
+    if(v.material.type == rbd::parsers::Material::Type::COLOR)
+    {
+      const auto & c = boost::get<rbd::parsers::Material::Color>(v.material.data);
+      data.color = ColorFromNormalized(
+          {static_cast<float>(c.r), static_cast<float>(c.g), static_cast<float>(c.b), static_cast<float>(c.a)});
+    }
+    else if(v.material.type == rbd::parsers::Material::Type::TEXTURE)
+    {
+      const auto & textureIn = boost::get<rbd::parsers::Material::Texture>(v.material.data);
+      auto filename = convertURI(textureIn.filename).string();
+      auto texture = LoadTexture(filename.c_str());
+      data.model.materials[0].maps[MAP_ALBEDO].texture = texture;
+    }
+    if(shader)
+    {
+      for(int i = 0; i < data.model.materialCount; ++i)
+      {
+        data.model.materials[i].shader = *shader;
+      }
+    }
+  };
   auto fromMesh = [&](const rbd::parsers::Visual & v) {
     const auto & mesh = boost::get<rbd::parsers::Geometry::Mesh>(v.geometry.data);
     auto path = convertURI(mesh.filename);
@@ -288,34 +310,15 @@ BodyDrawer::BodyDrawer(const std::vector<rbd::parsers::Visual> & v, Shader * sha
 #endif
     if(path.extension() == ".obj" || path.extension() == ".gltf" || path.extension() == ".glb")
     {
-      models_.emplace_back(new ModelData{LoadModel(path.string().c_str()), path.leaf().string(),
-                                         static_cast<float>(mesh.scale), WHITE, v.origin});
+      models_.emplace_back(
+          new ModelData{LoadModel(path.string().c_str()), static_cast<float>(mesh.scale), WHITE, v.origin});
     }
     else
     {
-      models_.emplace_back(new ModelData{LoadModelAdvanced(path.string().c_str()), path.leaf().string(),
-                                         static_cast<float>(mesh.scale), WHITE, v.origin});
+      models_.emplace_back(
+          new ModelData{LoadModelAdvanced(path.string().c_str()), static_cast<float>(mesh.scale), WHITE, v.origin});
     }
-    if(v.material.type == rbd::parsers::Material::Type::COLOR)
-    {
-      const auto & c = boost::get<rbd::parsers::Material::Color>(v.material.data);
-      models_.back()->color = ColorFromNormalized(
-          {static_cast<float>(c.r), static_cast<float>(c.g), static_cast<float>(c.b), static_cast<float>(c.a)});
-    }
-    else if(v.material.type == rbd::parsers::Material::Type::TEXTURE)
-    {
-      const auto & textureIn = boost::get<rbd::parsers::Material::Texture>(v.material.data);
-      auto filename = convertURI(textureIn.filename).string();
-      auto texture = LoadTexture(filename.c_str());
-      models_.back()->model.materials[0].maps[MAP_ALBEDO].texture = texture;
-    }
-    if(shader)
-    {
-      for(int i = 0; i < models_.back()->model.materialCount; ++i)
-      {
-        models_.back()->model.materials[i].shader = *shader;
-      }
-    }
+    applyMaterial(v, *models_.back());
 #ifndef __EMSCRIPTEN__
     bfs::current_path(cwd);
 #else
@@ -323,12 +326,38 @@ BodyDrawer::BodyDrawer(const std::vector<rbd::parsers::Visual> & v, Shader * sha
     free(cwd);
 #endif
   };
+  auto fromBox = [&](const rbd::parsers::Visual & v) {
+    const auto & box = boost::get<rbd::parsers::Geometry::Box>(v.geometry.data);
+    Eigen::Vector3f s = box.size.cast<float>();
+    models_.emplace_back(new ModelData{LoadModelFromMesh(GenMeshCube(s.x(), s.y(), s.z())), 1.0, WHITE, v.origin});
+    applyMaterial(v, *models_.back());
+  };
+  auto fromCylinder = [&](const rbd::parsers::Visual & v) {
+    const auto & cylinder = boost::get<rbd::parsers::Geometry::Cylinder>(v.geometry.data);
+    models_.emplace_back(new ModelData{LoadModelFromMesh(GenMeshCylinderROS(cylinder.radius, cylinder.length, 32)), 1.0,
+                                       WHITE, v.origin});
+    applyMaterial(v, *models_.back());
+  };
+  auto fromSphere = [&](const rbd::parsers::Visual & v) {
+    const auto & sphere = boost::get<rbd::parsers::Geometry::Sphere>(v.geometry.data);
+    models_.emplace_back(new ModelData{LoadModelFromMesh(GenMeshSphere(sphere.radius, 32, 32)), 1.0, WHITE, v.origin});
+    applyMaterial(v, *models_.back());
+  };
   for(const auto & visual : v)
   {
     switch(visual.geometry.type)
     {
       case rbd::parsers::Geometry::MESH:
         fromMesh(visual);
+        break;
+      case rbd::parsers::Geometry::BOX:
+        fromBox(visual);
+        break;
+      case rbd::parsers::Geometry::CYLINDER:
+        fromCylinder(visual);
+        break;
+      case rbd::parsers::Geometry::SPHERE:
+        fromSphere(visual);
         break;
       default:
         break;

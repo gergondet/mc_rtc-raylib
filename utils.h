@@ -51,9 +51,15 @@ void DrawCylinderEx(Vector3 position,
                     int sides,
                     Color color);
 
+// Generate a cylinder mesh that is compatible with ROS URDF convention
+// - Shaft in the z-direction
+// - Origin at the cylinder center
+Mesh GenMeshCylinderROS(float radius, float height, int slices);
+
 // Draw a 3D arrow
 void DrawArrow(Vector3 p0, Vector3 p1, float shaft_diam, float head_diam, float head_len, Color color);
 
+// Draw a frame at the given position
 void DrawFrame(const sva::PTransformd & pose);
 
 /** Helper for ImGui::Combo with a vector of strings */
