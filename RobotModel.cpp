@@ -369,7 +369,7 @@ void BodyDrawer::update(const sva::PTransformd & pose)
 {
   for(auto & m : models_)
   {
-    m->model.transform = convert(m->X_b_model * pose);
+    m->model.transform = MatrixMultiply(MatrixScale(m->scale, m->scale, m->scale), convert(m->X_b_model * pose));
   }
 }
 
@@ -377,7 +377,7 @@ void BodyDrawer::draw()
 {
   for(const auto & m : models_)
   {
-    DrawModel(m->model, {0, 0, 0}, m->scale, m->color);
+    DrawModel(m->model, {0, 0, 0}, 1.0, m->color);
   }
 }
 
