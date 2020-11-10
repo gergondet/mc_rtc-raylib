@@ -8,7 +8,7 @@ struct Robot : public Widget
 
   ~Robot() override = default;
 
-  void data(const std::vector<std::vector<double>> & q);
+  void data(const std::vector<std::vector<double>> & q, const sva::PTransformd & posW);
 
   void draw2D() override;
 

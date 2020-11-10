@@ -30,12 +30,13 @@ Robot::Robot(Client & client, const ElementId & id, const std::vector<std::strin
   model_ = std::make_unique<RobotModel>(robots_->robot());
 }
 
-void Robot::data(const std::vector<std::vector<double>> & q)
+void Robot::data(const std::vector<std::vector<double>> & q, const sva::PTransformd & posW)
 {
   if(robots_)
   {
     robots_->robot().mbc().q = q;
     robots_->robot().forwardKinematics();
+    robots_->robot().posW(posW);
   }
   if(display_ && model_)
   {

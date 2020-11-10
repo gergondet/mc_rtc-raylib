@@ -331,9 +331,10 @@ void Client::form_data_combo_input(const ElementId & id,
 
 void Client::robot(const ElementId & id,
                    const std::vector<std::string> & params,
-                   const std::vector<std::vector<double>> & q)
+                   const std::vector<std::vector<double>> & q,
+                   const sva::PTransformd & posW)
 {
-  widget<Robot>(id, params).data(q);
+  widget<Robot>(id, params).data(q, posW);
 }
 
 void Client::schema(const ElementId & id, const std::string & schema)

@@ -139,7 +139,8 @@ private:
 
   void robot(const ElementId & id,
              const std::vector<std::string> & params,
-             const std::vector<std::vector<double>> & q) override;
+             const std::vector<std::vector<double>> & q,
+             const sva::PTransformd & posW) override;
 
   void schema(const ElementId & id, const std::string & schema) override;
 
