@@ -59,6 +59,7 @@ struct TickerLoopData
   std::chrono::system_clock::time_point start_t;
   double ratio = 1.0;
   TickerConfiguration config;
+  size_t display = 0;
 };
 
 static TickerLoopData data;
@@ -228,6 +229,17 @@ void RenderLoop()
 
   EndMode3D();
 
+  if(data.running && data.gc == nullptr) // starting
+  {
+    std::string text = "Controller is starting, please wait...";
+    auto tSize = MeasureText(text.c_str(), 20);
+    size_t np = ((data.display % 60) * 4) / 60;
+    text = text.substr(0, text.size() - 3) + std::string(np, '.');
+    auto posX = (GetScreenWidth() - tSize) / 2;
+    auto posY = 0.25 * GetScreenHeight();
+    DrawText(text.c_str(), posX, posY, 20, DARKGRAY);
+  }
+
   if(!with_ticker)
   {
     DrawFPS(10, 10);
@@ -298,7 +310,8 @@ void RenderLoop()
   ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
   EndDrawing();
-  //----------------------------------------------------------------------------------
+
+  data.display++;
 }
 
 int main(void)
