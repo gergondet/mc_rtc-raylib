@@ -54,7 +54,7 @@ struct TickerLoopData
   std::thread thread;
   bool running = true;
   size_t iter = 0;
-  mc_control::MCGlobalController * gc = nullptr;
+  std::unique_ptr<mc_control::MCGlobalController> gc = nullptr;
   std::function<void()> simulateSensors;
   std::chrono::system_clock::time_point start_t;
   double ratio = 1.0;
@@ -67,7 +67,8 @@ void StartTicker()
 {
   data.thread = std::thread([]() {
     data.running = true;
-    mc_control::MCGlobalController gc((data.config.directory / "mc_rtc.yaml").string());
+    auto gc_ptr = std::make_unique<mc_control::MCGlobalController>((data.config.directory / "mc_rtc.yaml").string());
+    auto & gc = *gc_ptr;
     data.config.config = gc.configuration().config;
 
     const auto & mb = gc.robot().mb();
@@ -130,7 +131,7 @@ void StartTicker()
     };
 
     data.iter = 0;
-    data.gc = &gc;
+    data.gc = std::move(gc_ptr);
     data.start_t = std::chrono::system_clock::now();
     client_ptr->connect(gc.server(), *gc.controller().gui());
     fps = static_cast<int>(1 / gc.timestep());
