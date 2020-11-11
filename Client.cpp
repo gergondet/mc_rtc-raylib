@@ -116,6 +116,10 @@ void Client::clear()
 {
   root_.categories.clear();
   root_.widgets.clear();
+}
+
+void Client::clearConsole()
+{
   if(sink_)
   {
     sink_->clear();

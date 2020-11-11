@@ -38,6 +38,9 @@ struct Client : public mc_control::ControllerClient
   /** Remove all elements */
   void clear();
 
+  /** Clear the log console */
+  void clearConsole();
+
   inline const mc_rtc::Configuration & data() const noexcept
   {
     return data_;

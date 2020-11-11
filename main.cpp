@@ -296,6 +296,7 @@ void RenderLoop()
       Combo("Controller", data.config.controllers, data.config.Enabled);
       if(ImGui::Button("Start"))
       {
+        client_ptr->clearConsole();
         auto c_path = (data.config.directory / "mc_rtc.yaml").string();
         mc_rtc::Configuration config(c_path);
         config.add("MainRobot", data.config.MainRobot);
