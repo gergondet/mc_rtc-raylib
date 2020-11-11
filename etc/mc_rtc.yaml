@@ -7,3 +7,4 @@ GUIServer:
   Timestep: 0.015
 IncludeHalfSitController: false
 ControllerModulePaths: [/assets/controllers/]
+RobotModulePaths: [/assets/robots/]
