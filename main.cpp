@@ -25,6 +25,20 @@
 #include <boost/filesystem.hpp>
 namespace bfs = boost::filesystem;
 
+/** mc_rbdyn::RobotLoader::available_robots() but hides env, object, json and related aliases */
+static std::vector<std::string> get_available_robots()
+{
+  auto out = mc_rbdyn::RobotLoader::available_robots();
+  out.erase(std::remove_if(out.begin(), out.end(),
+                           [](const auto & s) {
+                             return s == "env" || s == "object" || s == "json"
+                                    || (s.size() >= 4 && s.substr(0, 4) == "env/")
+                                    || (s.size() >= 7 && s.substr(0, 7) == "object/");
+                           }),
+            out.end());
+  return out;
+}
+
 // Target FPS for the ticker
 size_t fps = 50;
 
@@ -295,7 +309,7 @@ void RenderLoop()
           data.config.config = data.gc->configuration().config;
           data.config.MainRobot = static_cast<std::string>(data.config.config("MainRobot"));
           data.config.Enabled = static_cast<std::string>(data.gc->current_controller());
-          data.config.robots = mc_rbdyn::RobotLoader::available_robots();
+          data.config.robots = get_available_robots();
           data.config.controllers = data.gc->loaded_controllers();
           data.running = false;
           data.ratio = 1.0;
