@@ -22,6 +22,7 @@ if(EMSCRIPTEN)
   find_description_package(jvrc_description)
 
   file(COPY etc/mc_rtc.yaml DESTINATION ${PROJECT_BINARY_DIR}/assets/etc/)
+  file(COPY ${MC_RTC_LIBDIR}/mc_controller/etc DESTINATION ${PROJECT_BINARY_DIR}/assets/controllers/)
   file(COPY ${JVRC_DESCRIPTION_PATH} DESTINATION ${PROJECT_BINARY_DIR}/assets/)
   file(COPY ${MC_ENV_DESCRIPTION_PATH} DESTINATION ${PROJECT_BINARY_DIR}/assets/)
   file(COPY ${MC_RTC_BINDIR}/../share/doc/mc_rtc/json/schemas DESTINATION ${PROJECT_BINARY_DIR}/assets/)

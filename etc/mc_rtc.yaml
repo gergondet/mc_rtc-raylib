@@ -6,3 +6,4 @@ GUIServer:
   Enable: true
   Timestep: 0.015
 IncludeHalfSitController: false
+ControllerModulePaths: [/assets/controllers/]
