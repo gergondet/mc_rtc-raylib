@@ -66,90 +66,106 @@ static TickerLoopData data;
 
 void StartTicker()
 {
+  if(data.thread.joinable())
+  {
+    data.thread.join();
+  }
   data.thread = std::thread([]() {
-    data.running = true;
-    auto gc_ptr = std::make_unique<mc_control::MCGlobalController>((data.config.directory / "mc_rtc.yaml").string());
-    auto & gc = *gc_ptr;
-    data.config.config = gc.configuration().config;
-
-    const auto & mb = gc.robot().mb();
-    const auto & mbc = gc.robot().mbc();
-    const auto & rjo = gc.ref_joint_order();
-    std::vector<double> initq;
-    for(const auto & jn : rjo)
+    try
     {
-      for(const auto & qi : mbc.q[static_cast<unsigned int>(mb.jointIndexByName(jn))])
-      {
-        initq.push_back(qi);
-      }
-    }
 
-    std::vector<double> qEnc(initq.size(), 0);
-    std::vector<double> alphaEnc(initq.size(), 0);
-    auto simulateSensors = [&, qEnc, alphaEnc]() mutable {
-      auto & robot = gc.robot();
-      for(unsigned i = 0; i < robot.refJointOrder().size(); i++)
+      data.running = true;
+      auto gc_ptr = std::make_unique<mc_control::MCGlobalController>((data.config.directory / "mc_rtc.yaml").string());
+      auto & gc = *gc_ptr;
+      data.config.config = gc.configuration().config;
+
+      const auto & mb = gc.robot().mb();
+      const auto & mbc = gc.robot().mbc();
+      const auto & rjo = gc.ref_joint_order();
+      std::vector<double> initq;
+      for(const auto & jn : rjo)
       {
-        auto jIdx = robot.jointIndexInMBC(i);
-        if(jIdx != -1)
+        for(const auto & qi : mbc.q[static_cast<unsigned int>(mb.jointIndexByName(jn))])
         {
-          auto jointIndex = static_cast<unsigned>(jIdx);
-          qEnc[i] = robot.mbc().q[jointIndex][0];
-          alphaEnc[i] = robot.mbc().alpha[jointIndex][0];
+          initq.push_back(qi);
         }
       }
+
+      std::vector<double> qEnc(initq.size(), 0);
+      std::vector<double> alphaEnc(initq.size(), 0);
+      auto simulateSensors = [&, qEnc, alphaEnc]() mutable {
+        auto & robot = gc.robot();
+        for(unsigned i = 0; i < robot.refJointOrder().size(); i++)
+        {
+          auto jIdx = robot.jointIndexInMBC(i);
+          if(jIdx != -1)
+          {
+            auto jointIndex = static_cast<unsigned>(jIdx);
+            qEnc[i] = robot.mbc().q[jointIndex][0];
+            alphaEnc[i] = robot.mbc().alpha[jointIndex][0];
+          }
+        }
+        gc.setEncoderValues(qEnc);
+        gc.setEncoderVelocities(alphaEnc);
+        if(robot.hasBodySensor("FloatingBase"))
+        {
+          gc.setSensorPositions({{"FloatingBase", robot.posW().translation()}});
+          gc.setSensorOrientations({{"FloatingBase", Eigen::Quaterniond{robot.posW().rotation()}}});
+        }
+      };
+      data.simulateSensors = simulateSensors;
+
       gc.setEncoderValues(qEnc);
-      gc.setEncoderVelocities(alphaEnc);
-      if(robot.hasBodySensor("FloatingBase"))
-      {
-        gc.setSensorPositions({{"FloatingBase", robot.posW().translation()}});
-        gc.setSensorOrientations({{"FloatingBase", Eigen::Quaterniond{robot.posW().rotation()}}});
-      }
-    };
-    data.simulateSensors = simulateSensors;
+      gc.init(initq, gc.robot().module().default_attitude());
+      gc.running = true;
 
-    gc.setEncoderValues(qEnc);
-    gc.init(initq, gc.robot().module().default_attitude());
-    gc.running = true;
-
-    auto loop_fn = [](void * dataPtr) {
-      auto & data = *static_cast<TickerLoopData *>(dataPtr);
-      if(!data.running)
-      {
-        client_ptr->stop();
-        data.gc = nullptr;
+      auto loop_fn = [](void * dataPtr) {
+        auto & data = *static_cast<TickerLoopData *>(dataPtr);
+        if(!data.running)
+        {
+          client_ptr->stop();
+          data.gc = nullptr;
 #ifdef __EMSCRIPTEN__
-        emscripten_cancel_main_loop();
+          emscripten_cancel_main_loop();
 #endif
-        return;
-      }
-      data.simulateSensors();
-      data.gc->run();
-      double sim_t = data.iter++ * data.gc->timestep();
-      using duration_ms = std::chrono::duration<double, std::milli>;
-      double real_t = duration_ms(std::chrono::system_clock::now() - data.start_t).count() / 1000.0;
-      data.ratio = sim_t / real_t;
-    };
+          return;
+        }
+        data.simulateSensors();
+        data.gc->run();
+        double sim_t = data.iter++ * data.gc->timestep();
+        using duration_ms = std::chrono::duration<double, std::milli>;
+        double real_t = duration_ms(std::chrono::system_clock::now() - data.start_t).count() / 1000.0;
+        data.ratio = sim_t / real_t;
+      };
 
-    data.iter = 0;
-    data.gc = std::move(gc_ptr);
-    data.start_t = std::chrono::system_clock::now();
-    client_ptr->connect(gc.server(), *gc.controller().gui());
-    fps = static_cast<int>(1 / gc.timestep());
-    mc_rtc::log::info("Target background fps: {}", fps);
+      data.iter = 0;
+      data.gc = std::move(gc_ptr);
+      data.start_t = std::chrono::system_clock::now();
+      client_ptr->connect(gc.server(), *gc.controller().gui());
+      fps = static_cast<int>(1 / gc.timestep());
+      mc_rtc::log::info("Target background fps: {}", fps);
 #ifdef __EMSCRIPTEN__
-    emscripten_set_main_loop_arg(loop_fn, &data, fps, 1);
+      emscripten_set_main_loop_arg(loop_fn, &data, fps, 1);
 #else
-    while(data.running)
-    {
-      auto next =
-          std::chrono::system_clock::now() + std::chrono::microseconds(static_cast<int>(1000 * 1000 * gc.timestep()));
-      loop_fn(&data);
-      std::this_thread::sleep_until(next);
-    }
-    client_ptr->stop();
-    data.gc = nullptr;
+      while(data.running)
+      {
+        auto next =
+            std::chrono::system_clock::now() + std::chrono::microseconds(static_cast<int>(1000 * 1000 * gc.timestep()));
+        loop_fn(&data);
+        std::this_thread::sleep_until(next);
+      }
+      client_ptr->stop();
+      data.gc = nullptr;
 #endif
+    }
+    catch(...)
+    {
+#ifndef __EMSCRIPTEN__
+      client_ptr->stop();
+#endif
+      data.running = false;
+      data.gc = nullptr;
+    }
   });
 #ifdef __EMSCRIPTEN__
   data.thread.detach();
