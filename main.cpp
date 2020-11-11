@@ -246,8 +246,8 @@ void RenderLoop()
     auto bottom_margin = 50;
     auto width = GetScreenWidth() - left_margin - right_margin;
     auto height = GetScreenHeight() - top_margin - bottom_margin;
-    auto w_width = 0.05 * width;
-    auto w_height = 0.1 * height;
+    auto w_width = 0.15 * width;
+    auto w_height = 0.15 * height;
     ImGui::SetNextWindowPos(ImVec2(width + left_margin - w_width, height + top_margin - w_height),
                             ImGuiCond_FirstUseEver);
     ImGui::SetNextWindowSize(ImVec2(w_width, w_height), ImGuiCond_FirstUseEver);
