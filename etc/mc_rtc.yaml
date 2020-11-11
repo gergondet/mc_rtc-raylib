@@ -1,5 +1,5 @@
 MainRobot: JVRC1
-Enabled: CoM
+Enabled: FSM
 Timestep: 0.02
 Log: false
 GUIServer:
