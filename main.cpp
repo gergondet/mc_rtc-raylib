@@ -44,7 +44,9 @@ static std::vector<std::string> get_available_robots()
 size_t fps = 50;
 
 // Override target FPS for some known controllers
-std::unordered_map<std::string, size_t> controllers_fps = {{"AdmittanceSample", 200}, {"LIPMStabilizer", 200}};
+std::unordered_map<std::string, size_t> controllers_fps = {{"AdmittanceSample", 200},
+                                                           {"LIPMStabilizer", 200},
+                                                           {"LIPMWalking", 200}};
 
 static OrbitCamera * camera_ptr = nullptr;
 static Client * client_ptr = nullptr;

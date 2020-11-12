@@ -65,6 +65,11 @@ if(EMSCRIPTEN)
   file(READ ${PROJECT_BINARY_DIR}/assets/controllers/etc/AdmittanceSample.yaml CTL_CONF)
   string(REPLACE "${MC_RTC_LIBDIR}/mc_controller" "/assets/controllers" CTL_CONF "${CTL_CONF}")
   file(WRITE ${PROJECT_BINARY_DIR}/assets/controllers/etc/AdmittanceSample.yaml "${CTL_CONF}")
+
+  # LIPMWalking configuration
+  file(READ ${PROJECT_BINARY_DIR}/assets/controllers/etc/LIPMWalking.yaml CTL_CONF)
+  string(REPLACE "${MC_RTC_LIBDIR}/mc_controller" "/assets/controllers" CTL_CONF "${CTL_CONF}")
+  file(WRITE ${PROJECT_BINARY_DIR}/assets/controllers/etc/LIPMWalking.yaml "${CTL_CONF}")
 endif()
 
 find_package(assimp REQUIRED)
