@@ -343,7 +343,7 @@ void RenderLoop()
     {
       Combo("Robot", data.config.robots, data.config.MainRobot);
       Combo("Controller", data.config.controllers, data.config.Enabled);
-      static int fps_in = fps;
+      int fps_in = fps;
       auto flags = ImGuiInputTextFlags_None;
 #ifdef __EMSCRIPTEN__
       if(controllers_fps.count(data.config.Enabled))
