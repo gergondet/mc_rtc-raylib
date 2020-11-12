@@ -36,6 +36,7 @@ static std::vector<std::string> get_available_robots()
                                     || (s.size() >= 7 && s.substr(0, 7) == "object/");
                            }),
             out.end());
+  std::sort(out.begin(), out.end());
   return out;
 }
 
@@ -311,6 +312,7 @@ void RenderLoop()
           data.config.Enabled = static_cast<std::string>(data.gc->current_controller());
           data.config.robots = get_available_robots();
           data.config.controllers = data.gc->loaded_controllers();
+          std::sort(data.config.controllers.begin(), data.config.controllers.end());
           data.running = false;
           data.ratio = 1.0;
           if(data.thread.joinable())
