@@ -47,14 +47,24 @@ if(EMSCRIPTEN)
 
   # FSM controller configuration
   file(COPY ${MC_RTC_LIBDIR}/mc_controller/fsm/states/data DESTINATION ${PROJECT_BINARY_DIR}/assets/controllers/fsm/states/)
-  file(READ ${PROJECT_BINARY_DIR}/assets/controllers/etc/FSM.conf FSM_CONF)
-  string(REPLACE "${MC_RTC_LIBDIR}/mc_controller" "/assets/controllers" FSM_CONF "${FSM_CONF}")
-  file(WRITE ${PROJECT_BINARY_DIR}/assets/controllers/etc/FSM.conf "${FSM_CONF}")
+  file(READ ${PROJECT_BINARY_DIR}/assets/controllers/etc/FSM.conf CTL_CONF)
+  string(REPLACE "${MC_RTC_LIBDIR}/mc_controller" "/assets/controllers" CTL_CONF "${CTL_CONF}")
+  file(WRITE ${PROJECT_BINARY_DIR}/assets/controllers/etc/FSM.conf "${CTL_CONF}")
 
   # DoorSample configuration
-  file(READ ${PROJECT_BINARY_DIR}/assets/controllers/etc/DoorSample.yaml FSM_CONF)
-  string(REPLACE "${MC_RTC_LIBDIR}/mc_controller" "/assets/controllers" FSM_CONF "${FSM_CONF}")
-  file(WRITE ${PROJECT_BINARY_DIR}/assets/controllers/etc/DoorSample.yaml "${FSM_CONF}")
+  file(READ ${PROJECT_BINARY_DIR}/assets/controllers/etc/DoorSample.yaml CTL_CONF)
+  string(REPLACE "${MC_RTC_LIBDIR}/mc_controller" "/assets/controllers" CTL_CONF "${CTL_CONF}")
+  file(WRITE ${PROJECT_BINARY_DIR}/assets/controllers/etc/DoorSample.yaml "${CTL_CONF}")
+
+  # LIPMStabilizer configuration
+  file(READ ${PROJECT_BINARY_DIR}/assets/controllers/etc/LIPMStabilizer.yaml CTL_CONF)
+  string(REPLACE "${MC_RTC_LIBDIR}/mc_controller" "/assets/controllers" CTL_CONF "${CTL_CONF}")
+  file(WRITE ${PROJECT_BINARY_DIR}/assets/controllers/etc/LIPMStabilizer.yaml "${CTL_CONF}")
+
+  # AdmittanceSample configuration
+  file(READ ${PROJECT_BINARY_DIR}/assets/controllers/etc/AdmittanceSample.yaml CTL_CONF)
+  string(REPLACE "${MC_RTC_LIBDIR}/mc_controller" "/assets/controllers" CTL_CONF "${CTL_CONF}")
+  file(WRITE ${PROJECT_BINARY_DIR}/assets/controllers/etc/AdmittanceSample.yaml "${CTL_CONF}")
 endif()
 
 find_package(assimp REQUIRED)
