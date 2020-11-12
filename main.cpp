@@ -43,6 +43,9 @@ static std::vector<std::string> get_available_robots()
 // Target FPS for the ticker
 size_t fps = 50;
 
+// Override target FPS for some known controllers
+std::unordered_map<std::string, size_t> controllers_fps = {{"AdmittanceSample", 200}, {"LIPMStabilizer", 200}};
+
 static OrbitCamera * camera_ptr = nullptr;
 static Client * client_ptr = nullptr;
 static SceneState * state_ptr = nullptr;
@@ -90,8 +93,20 @@ void StartTicker()
     {
 
       data.running = true;
+#ifdef __EMSCRIPTEN__
+      {
+        mc_rtc::Configuration config((data.config.directory / "mc_rtc.yaml").string());
+        std::string next_ctl = config("Enabled");
+        double dt = 1.0 / static_cast<double>(controllers_fps.count(next_ctl) ? controllers_fps.at(next_ctl) : fps);
+        config.add("Timestep", dt);
+        config.save((data.config.directory / "mc_rtc.yaml").string());
+      }
+#endif
       auto gc_ptr = std::make_unique<mc_control::MCGlobalController>((data.config.directory / "mc_rtc.yaml").string());
       auto & gc = *gc_ptr;
+#ifndef __EMSCRIPTEN__
+      fps = gc.timestep();
+#endif
       data.config.config = gc.configuration().config;
 
       const auto & mb = gc.robot().mb();
@@ -289,8 +304,8 @@ void RenderLoop()
     auto bottom_margin = 50;
     auto width = GetScreenWidth() - left_margin - right_margin;
     auto height = GetScreenHeight() - top_margin - bottom_margin;
-    auto w_width = 0.15 * width;
-    auto w_height = 0.15 * height;
+    auto w_width = 0.2 * width;
+    auto w_height = 0.2 * height;
     ImGui::SetNextWindowPos(ImVec2(width + left_margin - w_width, height + top_margin - w_height),
                             ImGuiCond_FirstUseEver);
     ImGui::SetNextWindowSize(ImVec2(w_width, w_height), ImGuiCond_FirstUseEver);
@@ -326,13 +341,39 @@ void RenderLoop()
     {
       Combo("Robot", data.config.robots, data.config.MainRobot);
       Combo("Controller", data.config.controllers, data.config.Enabled);
+      static int fps_in = fps;
+      auto flags = ImGuiInputTextFlags_None;
+#ifdef __EMSCRIPTEN__
+      if(controllers_fps.count(data.config.Enabled))
+      {
+        flags = ImGuiInputTextFlags_ReadOnly;
+        fps_in = controllers_fps.at(data.config.Enabled);
+      }
+      else
+      {
+        fps_in = fps;
+      }
+#endif
+      if(ImGui::InputInt("Ticker FPS", &fps_in, 0, 0, flags))
+      {
+        if(fps_in > 0)
+        {
+          fps = fps_in;
+        }
+      }
       if(ImGui::Button("Start"))
       {
+        if(fps_in > 0)
+        {
+          fps = fps_in;
+        }
         client_ptr->clearConsole();
         auto c_path = (data.config.directory / "mc_rtc.yaml").string();
         mc_rtc::Configuration config(c_path);
         config.add("MainRobot", data.config.MainRobot);
         config.add("Enabled", data.config.Enabled);
+        double dt = 1.0 / static_cast<double>(fps);
+        config.add("Timestep", dt);
         config.save(c_path);
         StartTicker();
       }
