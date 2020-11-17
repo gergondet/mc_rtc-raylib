@@ -25,6 +25,9 @@
 #include <boost/filesystem.hpp>
 namespace bfs = boost::filesystem;
 
+#include <boost/program_options.hpp>
+namespace po = boost::program_options;
+
 /** mc_rbdyn::RobotLoader::available_robots() but hides env, object, json and related aliases */
 static std::vector<std::string> get_available_robots()
 {
@@ -53,11 +56,7 @@ static Client * client_ptr = nullptr;
 static SceneState * state_ptr = nullptr;
 static ImGuiIO * io_ptr = nullptr;
 
-#ifdef __EMSCRIPTEN__
 static bool with_ticker = true;
-#else
-static bool with_ticker = true;
-#endif
 
 struct TickerConfiguration
 {
@@ -84,6 +83,26 @@ struct TickerLoopData
 
 static TickerLoopData data;
 
+static bfs::path GetConfigurationPath()
+{
+  return data.config.directory / bfs::path("mc_rtc.yaml");
+}
+
+static mc_rtc::Configuration LoadConfiguration()
+{
+  bfs::path path = GetConfigurationPath();
+  if(bfs::exists(path))
+  {
+    return mc_rtc::Configuration(path.string());
+  }
+  return mc_rtc::Configuration();
+}
+
+static void SaveConfiguration(const mc_rtc::Configuration & conf)
+{
+  conf.save(GetConfigurationPath().string());
+}
+
 void StartTicker()
 {
   if(data.thread.joinable())
@@ -97,14 +116,14 @@ void StartTicker()
       data.running = true;
 #ifdef __EMSCRIPTEN__
       {
-        mc_rtc::Configuration config((data.config.directory / "mc_rtc.yaml").string());
+        auto config = LoadConfiguration();
         std::string next_ctl = config("Enabled");
         double dt = 1.0 / static_cast<double>(controllers_fps.count(next_ctl) ? controllers_fps.at(next_ctl) : fps);
         config.add("Timestep", dt);
-        config.save((data.config.directory / "mc_rtc.yaml").string());
+        SaveConfiguration(config);
       }
 #endif
-      auto gc_ptr = std::make_unique<mc_control::MCGlobalController>((data.config.directory / "mc_rtc.yaml").string());
+      auto gc_ptr = std::make_unique<mc_control::MCGlobalController>(GetConfigurationPath().string());
       auto & gc = *gc_ptr;
 #ifndef __EMSCRIPTEN__
       fps = gc.timestep();
@@ -277,7 +296,7 @@ void RenderLoop()
 
   EndMode3D();
 
-  if(data.running && data.gc == nullptr) // starting
+  if(with_ticker && data.running && data.gc == nullptr) // starting
   {
     std::string text = "Controller is starting, please wait...";
     auto tSize = MeasureText(text.c_str(), 20);
@@ -370,13 +389,12 @@ void RenderLoop()
           fps = fps_in;
         }
         client_ptr->clearConsole();
-        auto c_path = (data.config.directory / "mc_rtc.yaml").string();
-        mc_rtc::Configuration config(c_path);
+        auto config = LoadConfiguration();
         config.add("MainRobot", data.config.MainRobot);
         config.add("Enabled", data.config.Enabled);
         double dt = 1.0 / static_cast<double>(fps);
         config.add("Timestep", dt);
-        config.save(c_path);
+        SaveConfiguration(config);
         StartTicker();
       }
     }
@@ -390,19 +408,55 @@ void RenderLoop()
   data.display++;
 }
 
-int main(void)
+int main(int argc, char * argv[])
 {
-  // Initialization
-  //--------------------------------------------------------------------------------------
-  const int screenWidth = 1600;
-  const int screenHeight = 900;
-
 #ifndef __EMSCRIPTEN__
   data.config.directory = bfs::temp_directory_path() / bfs::unique_path();
   bfs::create_directories(data.config.directory);
 #else
   data.config.directory = bfs::path("/assets/etc");
 #endif
+
+  // Options
+  po::options_description desc(fmt::format("{} options", argv[0]));
+  // clang-format off
+  desc.add_options()
+#ifndef __EMSCRIPTEN__
+    ("help", "Show this message")
+    ("with-ticker", po::bool_switch())
+#endif
+    ("robot", po::value<std::string>(&data.config.MainRobot), "Robot to be controlled")
+    ("controller", po::value<std::string>(&data.config.Enabled), "Controller to start");
+  // clang-format on
+  po::variables_map vm;
+  po::store(po::parse_command_line(argc, argv, desc), vm);
+  po::notify(vm);
+  if(vm.count("help"))
+  {
+    std::cout << desc << "\n";
+    return 1;
+  }
+#ifndef __EMSCRIPTEN__
+  with_ticker = vm["with-ticker"].as<bool>();
+#endif
+  if(data.config.MainRobot.size() || data.config.Enabled.size())
+  {
+    auto config = LoadConfiguration();
+    if(data.config.MainRobot.size())
+    {
+      config.add("MainRobot", data.config.MainRobot);
+    }
+    if(data.config.Enabled.size())
+    {
+      config.add("Enabled", data.config.Enabled);
+    }
+    SaveConfiguration(config);
+  }
+
+  // Initialization
+  //--------------------------------------------------------------------------------------
+  const int screenWidth = 1600;
+  const int screenHeight = 900;
 
   SetConfigFlags(FLAG_MSAA_4X_HINT); // Enable Multi Sampling Anti Aliasing 4x (if available)
   SetConfigFlags(FLAG_WINDOW_RESIZABLE);
