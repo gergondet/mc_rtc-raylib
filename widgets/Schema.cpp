@@ -217,7 +217,6 @@ void Schema::draw2D()
     if(form_->draw(id.name.c_str()) && form_->ready())
     {
       auto data = form_->data();
-      mc_rtc::log::info("REQUEST\n{}", data.dump(true, true));
       client.send_request(id, data);
       form_ = std::make_unique<SchemaForm>(*this, form_->title(), schemas_[form_->title()]);
     }
