@@ -108,7 +108,38 @@
       var spinnerElement = document.getElementById('spinner');
 
       var Module = {
-        preRun: [],
+        arguments: [],
+        preRun: [
+          function() {
+            params = window.location.hash.substring(1)
+                    .split('&')
+                    .map(v => v.split('='))
+                    .reduce( (pre, [key, value]) => ({...pre,[key]:value }), {});
+            if(params.robot)
+            {
+              Module.arguments.push("--robot");
+              Module.arguments.push(params.robot);
+            }
+            if(params.controller)
+            {
+              Module.arguments.push("--controller");
+              Module.arguments.push(params.controller);
+            }
+          },
+          function() {
+            window.onhashchange = function() {
+              params = window.location.hash.substring(1)
+                      .split('&')
+                      .map(v => v.split('='))
+                      .reduce( (pre, [key, value]) => ({...pre,[key]:value }), {});
+              robot = "";
+              if(params.robot) { robot = params.robot; }
+              controller = "";
+              if(params.controller) { controller = params.controller; }
+              Module.ccall('RestartTicker', null, ['string', 'string'], [robot, controller]);
+            }
+          }
+        ],
         postRun: [],
         print: (function() {
           return function(text) {

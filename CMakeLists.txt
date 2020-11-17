@@ -15,6 +15,8 @@ project(mc-rtc-raylib LANGUAGES C CXX VERSION 0.1.0)
 
 find_package(mc_rtc REQUIRED)
 
+find_package(Boost REQUIRED COMPONENTS program_options)
+
 if(EMSCRIPTEN)
   set(CMAKE_EXECUTABLE_SUFFIX .html)
 
@@ -153,11 +155,11 @@ if(EMSCRIPTEN)
   set_target_properties(main PROPERTIES OUTPUT_NAME index)
   set_target_properties(main PROPERTIES COMPILE_FLAGS "-matomics -s USE_PTHREADS=1 -s DISABLE_EXCEPTION_CATCHING=0")
   target_link_libraries(main PUBLIC "-s USE_GLFW=3")
-  target_link_libraries(main PUBLIC IrrXML "--shell-file ${PROJECT_SOURCE_DIR}/index.html" "--preload-file assets" "-s USE_PTHREADS=1" "-s PTHREAD_POOL_SIZE=8" "-Wl,--error-limit=0" "-s DISABLE_EXCEPTION_CATCHING=0" "-s TOTAL_MEMORY=512MB" "-matomics" "-s USE_ZLIB=1" "-s ALLOW_MEMORY_GROWTH=1" "--source-map-base http://localhost:8000/" "-Wl,--whole-archive")
+  target_link_libraries(main PUBLIC IrrXML "-s EXPORTED_RUNTIME_METHODS='[\"ccall\",\"cwrap\"]'" "--shell-file ${PROJECT_SOURCE_DIR}/index.html" "--preload-file assets" "-s USE_PTHREADS=1" "-s PTHREAD_POOL_SIZE=8" "-Wl,--error-limit=0" "-s DISABLE_EXCEPTION_CATCHING=0" "-s TOTAL_MEMORY=512MB" "-matomics" "-s USE_ZLIB=1" "-s ALLOW_MEMORY_GROWTH=1" "--source-map-base http://localhost:8000/" "-Wl,--whole-archive")
 else()
   target_compile_definitions(main PUBLIC IMGUI_IMPL_OPENGL_LOADER_GLAD)
 endif()
-target_link_libraries(main PUBLIC mc_rtc::mc_control_fsm mc_rtc::mc_control_client)
+target_link_libraries(main PUBLIC mc_rtc::mc_control_fsm mc_rtc::mc_control_client Boost::program_options)
 if(TARGET mc_rtc::mc_rtc_ros)
   target_compile_definitions(main PUBLIC MC_RTC_HAS_ROS_SUPPORT)
   target_link_libraries(main PUBLIC mc_rtc::mc_rtc_ros)

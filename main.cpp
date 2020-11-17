@@ -223,6 +223,22 @@ void StartTicker()
 #endif
 }
 
+void StopTicker()
+{
+  data.config.config = data.gc->configuration().config;
+  data.config.MainRobot = static_cast<std::string>(data.config.config("MainRobot"));
+  data.config.Enabled = static_cast<std::string>(data.gc->current_controller());
+  data.config.robots = get_available_robots();
+  data.config.controllers = data.gc->loaded_controllers();
+  std::sort(data.config.controllers.begin(), data.config.controllers.end());
+  data.running = false;
+  data.ratio = 1.0;
+  if(data.thread.joinable())
+  {
+    data.thread.join();
+  }
+}
+
 void EmptyRender()
 {
   ImGui_ImplOpenGL3_NewFrame();
@@ -343,18 +359,7 @@ void RenderLoop()
       {
         if(ImGui::Button("Stop"))
         {
-          data.config.config = data.gc->configuration().config;
-          data.config.MainRobot = static_cast<std::string>(data.config.config("MainRobot"));
-          data.config.Enabled = static_cast<std::string>(data.gc->current_controller());
-          data.config.robots = get_available_robots();
-          data.config.controllers = data.gc->loaded_controllers();
-          std::sort(data.config.controllers.begin(), data.config.controllers.end());
-          data.running = false;
-          data.ratio = 1.0;
-          if(data.thread.joinable())
-          {
-            data.thread.join();
-          }
+          StopTicker();
         }
       }
     }
@@ -407,6 +412,41 @@ void RenderLoop()
 
   data.display++;
 }
+
+#ifdef __EMSCRIPTEN__
+extern "C"
+{
+
+  void EMSCRIPTEN_KEEPALIVE RestartTicker(const char * robot_, const char * controller_)
+  {
+    StopTicker();
+    while(data.gc != nullptr)
+    {
+      std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    }
+    client_ptr->clearConsole();
+    auto config = LoadConfiguration();
+    std::string robot(robot_);
+    if(robot.size())
+    {
+      config.add("MainRobot", robot);
+    }
+    std::string controller(controller_);
+    if(controller.size())
+    {
+      config.add("Enabled", controller);
+    }
+    if(controllers_fps.count(controller))
+    {
+      fps = controllers_fps.at(controller);
+    }
+    double dt = 1.0 / static_cast<double>(fps);
+    config.add("Timestep", dt);
+    SaveConfiguration(config);
+    StartTicker();
+  }
+}
+#endif
 
 int main(int argc, char * argv[])
 {
