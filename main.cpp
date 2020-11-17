@@ -109,6 +109,13 @@ void StartTicker()
   {
     data.thread.join();
   }
+#ifdef __EMSCRIPTEN__
+  {
+    auto config = LoadConfiguration();
+    data.config.MainRobot = static_cast<std::string>(config("MainRobot"));
+    data.config.Enabled = static_cast<std::string>(config("Enabled"));
+  }
+#endif
   data.thread = std::thread([]() {
     try
     {
@@ -542,6 +549,11 @@ int main(int argc, char * argv[])
   if(with_ticker)
   {
     StartTicker();
+#ifdef __EMSCRIPTEN__
+    const auto & MainRobot = data.config.MainRobot;
+    const auto & Enabled = data.config.Enabled;
+    EM_ASM({ Module.on_StartTicker(UTF8ToString($0), UTF8ToString($1)); }, MainRobot.c_str(), Enabled.c_str());
+#endif
   }
   else
   {

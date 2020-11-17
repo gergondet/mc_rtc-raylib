@@ -108,6 +108,9 @@
       var spinnerElement = document.getElementById('spinner');
 
       var Module = {
+        on_StartTicker: function(robot, controller) {
+          history.pushState(null, null, document.location.pathname + `#robot=${robot}&controller=${controller}`);
+        },
         arguments: [],
         preRun: [
           function() {
