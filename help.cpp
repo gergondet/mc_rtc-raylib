@@ -35,7 +35,9 @@ inline void ShowGeneralHelp()
   {
     // clang-format off
     ShowBulletPoints({
-      "The \"Tasks\" tab lets you edit the active tasks properties, you can also interact with 3D markers to change some tasks objectives",
+      "The \"Tasks\" tab lets you edit the active tasks properties",
+      "You can also interact with 3D markers to change some tasks objectives",
+      "You can also remove tasks from there",
       "The \"Global/Add tasks\" tab lets you add tasks into the controller, you should first select a task from the dropdown menu then fill the required and optional parameters as you see fit",
       "Some tasks will not work correctly in this demo (e.g. force tasks)"
     });
