@@ -44,7 +44,7 @@ static std::vector<std::string> get_available_robots()
 }
 
 // Target FPS for the ticker
-size_t fps = 50;
+size_t fps = 200;
 
 // Override target FPS for some known controllers
 std::unordered_map<std::string, size_t> controllers_fps = {{"AdmittanceSample", 200},
@@ -490,6 +490,13 @@ int main(int argc, char * argv[])
   }
 #ifndef __EMSCRIPTEN__
   with_ticker = vm["with-ticker"].as<bool>();
+#endif
+#ifdef __EMSCRIPTEN__
+  {
+    auto config = LoadConfiguration();
+    double dt = config("Timestep");
+    fps = std::floor(1.0 / dt);
+  }
 #endif
   if(data.config.MainRobot.size() || data.config.Enabled.size())
   {
