@@ -408,6 +408,11 @@ void RenderLoop()
         config.add("Timestep", dt);
         SaveConfiguration(config);
         StartTicker();
+#ifdef __EMSCRIPTEN__
+        const auto & MainRobot = data.config.MainRobot;
+        const auto & Enabled = data.config.Enabled;
+        EM_ASM({ Module.on_StartTicker(UTF8ToString($0), UTF8ToString($1)); }, MainRobot.c_str(), Enabled.c_str());
+#endif
       }
     }
     ImGui::End();
