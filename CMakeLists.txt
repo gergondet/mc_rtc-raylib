@@ -43,36 +43,38 @@ if(EMSCRIPTEN)
   endforeach()
 
   file(COPY etc/mc_rtc.yaml DESTINATION ${PROJECT_BINARY_DIR}/assets/etc/)
-  file(COPY ${MC_RTC_LIBDIR}/mc_controller/etc DESTINATION ${PROJECT_BINARY_DIR}/assets/controllers/)
+  file(COPY ${MC_CONTROLLER_RUNTIME_INSTALL_PREFIX}/etc DESTINATION ${PROJECT_BINARY_DIR}/assets/controllers/)
+  file(COPY ${MC_PLUGINS_RUNTIME_INSTALL_PREFIX}/etc DESTINATION ${PROJECT_BINARY_DIR}/assets/plugins/)
+  file(COPY ${MC_PLUGINS_RUNTIME_INSTALL_PREFIX}/autoload DESTINATION ${PROJECT_BINARY_DIR}/assets/plugins/)
   file(COPY ${JVRC_DESCRIPTION_PATH} DESTINATION ${PROJECT_BINARY_DIR}/assets/)
   file(COPY ${MC_ENV_DESCRIPTION_PATH} DESTINATION ${PROJECT_BINARY_DIR}/assets/)
   file(COPY ${MC_INT_OBJ_DESCRIPTION_PATH} DESTINATION ${PROJECT_BINARY_DIR}/assets/)
   file(COPY ${MC_RTC_BINDIR}/../share/doc/mc_rtc/json/schemas DESTINATION ${PROJECT_BINARY_DIR}/assets/)
 
   # FSM controller configuration
-  file(COPY ${MC_RTC_LIBDIR}/mc_controller/fsm/states/data DESTINATION ${PROJECT_BINARY_DIR}/assets/controllers/fsm/states/)
+  file(COPY ${MC_CONTROLLER_RUNTIME_INSTALL_PREFIX}/fsm/states/data DESTINATION ${PROJECT_BINARY_DIR}/assets/controllers/fsm/states/)
   file(READ ${PROJECT_BINARY_DIR}/assets/controllers/etc/FSM.conf CTL_CONF)
-  string(REPLACE "${MC_RTC_LIBDIR}/mc_controller" "/assets/controllers" CTL_CONF "${CTL_CONF}")
+  string(REPLACE "${MC_CONTROLLER_RUNTIME_INSTALL_PREFIX}" "/assets/controllers" CTL_CONF "${CTL_CONF}")
   file(WRITE ${PROJECT_BINARY_DIR}/assets/controllers/etc/FSM.conf "${CTL_CONF}")
 
   # DoorSample configuration
   file(READ ${PROJECT_BINARY_DIR}/assets/controllers/etc/DoorSample.yaml CTL_CONF)
-  string(REPLACE "${MC_RTC_LIBDIR}/mc_controller" "/assets/controllers" CTL_CONF "${CTL_CONF}")
+  string(REPLACE "${MC_CONTROLLER_RUNTIME_INSTALL_PREFIX}" "/assets/controllers" CTL_CONF "${CTL_CONF}")
   file(WRITE ${PROJECT_BINARY_DIR}/assets/controllers/etc/DoorSample.yaml "${CTL_CONF}")
 
   # LIPMStabilizer configuration
   file(READ ${PROJECT_BINARY_DIR}/assets/controllers/etc/LIPMStabilizer.yaml CTL_CONF)
-  string(REPLACE "${MC_RTC_LIBDIR}/mc_controller" "/assets/controllers" CTL_CONF "${CTL_CONF}")
+  string(REPLACE "${MC_CONTROLLER_RUNTIME_INSTALL_PREFIX}" "/assets/controllers" CTL_CONF "${CTL_CONF}")
   file(WRITE ${PROJECT_BINARY_DIR}/assets/controllers/etc/LIPMStabilizer.yaml "${CTL_CONF}")
 
   # AdmittanceSample configuration
   file(READ ${PROJECT_BINARY_DIR}/assets/controllers/etc/AdmittanceSample.yaml CTL_CONF)
-  string(REPLACE "${MC_RTC_LIBDIR}/mc_controller" "/assets/controllers" CTL_CONF "${CTL_CONF}")
+  string(REPLACE "${MC_CONTROLLER_RUNTIME_INSTALL_PREFIX}" "/assets/controllers" CTL_CONF "${CTL_CONF}")
   file(WRITE ${PROJECT_BINARY_DIR}/assets/controllers/etc/AdmittanceSample.yaml "${CTL_CONF}")
 
   # LIPMWalking configuration
   file(READ ${PROJECT_BINARY_DIR}/assets/controllers/etc/LIPMWalking.yaml CTL_CONF)
-  string(REPLACE "${MC_RTC_LIBDIR}/mc_controller" "/assets/controllers" CTL_CONF "${CTL_CONF}")
+  string(REPLACE "${MC_CONTROLLER_RUNTIME_INSTALL_PREFIX}" "/assets/controllers" CTL_CONF "${CTL_CONF}")
   file(WRITE ${PROJECT_BINARY_DIR}/assets/controllers/etc/LIPMWalking.yaml "${CTL_CONF}")
 
   # Find panda package

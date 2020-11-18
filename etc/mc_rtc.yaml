@@ -8,3 +8,4 @@ GUIServer:
 IncludeHalfSitController: false
 ControllerModulePaths: [/assets/controllers/]
 RobotModulePaths: [/assets/robots/]
+GlobalPluginPaths: [/assets/plugins/]
