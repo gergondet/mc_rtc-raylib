@@ -3,33 +3,37 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Emscripten-Generated Code</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>mc_rtc - Web demonstration</title>
+
+    <link rel="apple-touch-icon" sizes="180x180" href="img/favicons/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="img/favicons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="img/favicons/favicon-16x16.png">
+    <link rel="manifest" href="img/favicons/site.webmanifest">
+    <link rel="mask-icon" href="img/favicons/safari-pinned-tab.svg" color="#5bbad5">
+    <meta name="msapplication-TileColor" content="#da532c">
+    <meta name="theme-color" content="#ffffff">
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/octicons/8.0.0/build.css" integrity="sha256-iPUhChwurLRCrDCM1+2a2LDe9pfW6Je29o/oA5VPr28=" crossorigin="anonymous" />
+
     <style>
       body {
-        font-family: arial;
-        margin: 0;
-        padding: none;
+        margin-top: 5px;
       }
 
       .emscripten { padding-right: 0; margin-left: auto; margin-right: auto; display: block; }
       div.emscripten { text-align: center; }
-      div.emscripten_border { border: 1px solid black; }
+      div.emscripten_border { margin-top: 5px; }
       /* the canvas *must not* have any border or padding, or mouse coords will be wrong */
       canvas.emscripten { border: 0px none; background-color: black; }
-
-      #emscripten_logo {
-        display: inline-block;
-        margin: 0;
-      }
 
       .spinner {
         height: 30px;
         width: 30px;
-        margin: 0;
-        margin-top: 20px;
-        margin-left: 20px;
+
         display: inline-block;
-        vertical-align: top;
 
         -webkit-animation: rotation .8s linear infinite;
         -moz-animation: rotation .8s linear infinite;
@@ -63,7 +67,6 @@
       }
 
       #status {
-        display: inline-block;
         vertical-align: top;
         margin-top: 30px;
         margin-left: 20px;
@@ -80,23 +83,43 @@
         display: inline-block;
         float: right;
         vertical-align: top;
-        margin-top: 30px;
-        margin-right: 20px;
       }
     </style>
   </head>
   <body>
-    <div class="spinner" id='spinner'></div>
-    <div class="emscripten" id="status">Downloading...</div>
-
-<span id='controls'>
-  <span><input type="button" value="Fullscreen" onclick="Module.requestFullscreen(true, true)"></span>
-</span>
-
-    <div class="emscripten">
-      <progress value="0" max="100" id="progress" hidden=1></progress>
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-2 text-center">
+          <div class="media">
+            <a href="https://jrl-umi3218.github.io/mc_rtc"><img class="img-fluid align-self-center mr-3" src="img/mc-rtc.png" alt="mc-rtc logo" style="max-height: 100px;"></a>
+            <div class="media-body">
+              <h6 class="mt-0"><a href="https://jrl-umi3218.github.io/mc_rtc">mc_rtc<hr>Web demonstration</a></h6>
+            </div>
+          </div>
+        </div>
+        <div class="col-1 text-right">
+          <div class="spinner text-right" id='spinner'></div>
+          <div id="status">Downloading...</div>
+          <progress value="0" max="100" id="progress" hidden=1></progress>
+        </div>
+        <div class="col-6 text-center">
+          <div class="overflow-auto" style="max-height: 105px;">
+            <div>
+            <span id='controls'>
+              <span><input type="button" value="Fullscreen" onclick="Module.requestFullscreen(true, true)"></span>
+            </span>
+              Play around with the demos by interacting with the GUI.<hr>
+              <em>Note: This demo does not work on mobile and does not include a physics simulation.</em>
+            </div>
+          </div>
+        </div>
+        <div class="col-3 text-right">
+          <a href="http://jrl-umi3218.github.io/"><img class="img-fluid" src="img/cnrs-aist.png" alt="CNRS-AIST logo" style="height: 40px;"></a><br>
+          <a href="http://baicirs.bit.edu.cn/english/index.htm"><img class="img-fluid" src="img/bit-baicirs.png" alt="CNRS-AIST logo" style="height: 40px;"></a><br>
+          <a href="https://github.com/jrl-umi3218/mc_rtc" target="blank_"><svg height="25" width="25" class="octicon octicon-mark-github" viewBox="0 0 16 16" version="1.1" aria-hidden="true"><path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path></svg></a>
+        </div>
+      </div>
     </div>
-
 
     <div class="emscripten_border">
       <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()" tabindex=-1></canvas>

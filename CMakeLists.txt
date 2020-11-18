@@ -20,6 +20,8 @@ find_package(Boost REQUIRED COMPONENTS program_options)
 if(EMSCRIPTEN)
   set(CMAKE_EXECUTABLE_SUFFIX .html)
 
+  file(COPY img DESTINATION ${PROJECT_BINARY_DIR})
+
   find_description_package(mc_env_description)
   find_description_package(mc_int_obj_description)
   find_description_package(jvrc_description)
