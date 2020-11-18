@@ -1,5 +1,5 @@
 MainRobot: JVRC1
-Enabled: Posture
+Enabled: EndEffector
 Timestep: 0.01
 Log: false
 GUIServer:
