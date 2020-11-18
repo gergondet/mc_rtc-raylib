@@ -475,7 +475,7 @@ int main(int argc, char * argv[])
   desc.add_options()
 #ifndef __EMSCRIPTEN__
     ("help", "Show this message")
-    ("with-ticker", po::bool_switch())
+    ("with-ticker", po::bool_switch(), "Run a ticker alongside the visualization")
 #endif
     ("robot", po::value<std::string>(&data.config.MainRobot), "Robot to be controlled")
     ("controller", po::value<std::string>(&data.config.Enabled), "Controller to start");
