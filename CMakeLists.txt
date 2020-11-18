@@ -127,6 +127,8 @@ set(main_SRC
   InteractiveMarker.cpp
   utils.h
   utils.cpp
+  help.h
+  help.cpp
   r3d.c
   Camera.h
   Camera.cpp

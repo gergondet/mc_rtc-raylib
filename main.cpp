@@ -10,6 +10,7 @@
 
 #include "Camera.h"
 #include "Client.h"
+#include "help.h"
 #include "utils.h"
 
 #include "Robot_Regular_ttf.h"
@@ -57,6 +58,12 @@ static SceneState * state_ptr = nullptr;
 static ImGuiIO * io_ptr = nullptr;
 
 static bool with_ticker = true;
+
+#ifdef __EMSCRIPTEN__
+static bool show_help = true;
+#else
+static bool show_help = false;
+#endif
 
 struct TickerConfiguration
 {
@@ -415,6 +422,11 @@ void RenderLoop()
 #endif
       }
     }
+    if(!show_help && ImGui::Button("Show help"))
+    {
+      show_help = true;
+    }
+    ShowHelpWindow(show_help, data.config.Enabled);
     ImGui::End();
   }
   ImGui::Render();
