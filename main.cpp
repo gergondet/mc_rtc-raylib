@@ -90,6 +90,30 @@ struct TickerLoopData
 
 static TickerLoopData data;
 
+/** data.gc->loaded_controllers() but remove some values */
+static std::vector<std::string> get_available_controllers()
+{
+  if(!data.gc)
+  {
+    return {};
+  }
+  auto out = data.gc->loaded_controllers();
+#ifdef __EMSCRIPTEN__
+  auto remove_if = [&](std::string_view s) {
+    auto it = std::find(out.begin(), out.end(), s);
+    if(it != out.end())
+    {
+      out.erase(it);
+    }
+  };
+  remove_if("AdmittanceSample");
+  remove_if("HalfSitPose");
+  remove_if("Text");
+#endif
+  std::sort(out.begin(), out.end());
+  return out;
+}
+
 static bfs::path GetConfigurationPath()
 {
   return data.config.directory / bfs::path("mc_rtc.yaml");
@@ -243,8 +267,7 @@ void StopTicker()
   data.config.MainRobot = static_cast<std::string>(data.config.config("MainRobot"));
   data.config.Enabled = static_cast<std::string>(data.gc->current_controller());
   data.config.robots = get_available_robots();
-  data.config.controllers = data.gc->loaded_controllers();
-  std::sort(data.config.controllers.begin(), data.config.controllers.end());
+  data.config.controllers = get_available_controllers();
   data.running = false;
   data.ratio = 1.0;
   if(data.thread.joinable())
