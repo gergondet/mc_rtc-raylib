@@ -1,0 +1,8 @@
+jvrc1:
+  tasks:
+    - type: body6d
+      body: l_wrist
+      stiffness: 5.0
+      weight: 200.0
+    - type: orientation
+      body: WAIST_R_S

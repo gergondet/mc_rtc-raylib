@@ -77,6 +77,9 @@ if(EMSCRIPTEN)
   string(REPLACE "${MC_CONTROLLER_RUNTIME_INSTALL_PREFIX}" "/assets/controllers" CTL_CONF "${CTL_CONF}")
   file(WRITE ${PROJECT_BINARY_DIR}/assets/controllers/etc/LIPMWalking.yaml "${CTL_CONF}")
 
+  # EndEffector configuration
+  file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/etc/EndEffector.yaml" DESTINATION "${PROJECT_BINARY_DIR}/assets/controllers/etc/")
+
   # Find panda package
   find_package(mc_panda)
   if(mc_panda_FOUND)
