@@ -1,3 +1,5 @@
+#include "win32_defs.h"
+
 #include <mc_rbdyn/RobotLoader.h>
 #include <mc_rbdyn/Robots.h>
 
@@ -560,9 +562,9 @@ int main(int argc, char * argv[])
   // Define the camera to look into our 3d world
   OrbitCamera camera;
   camera_ptr = &camera;
-  camera.position = (Vector3){2.5f, -1.5f, 1.3f}; // Camera position
-  camera.target = (Vector3){-0.15f, -0.4f, 0.75f}; // Camera looking at point
-  camera.up = (Vector3){0.0f, 0.0f, 1.0f}; // Camera up vector (rotation towards target)
+  camera.position = Vector3{2.5f, -1.5f, 1.3f}; // Camera position
+  camera.target = Vector3{-0.15f, -0.4f, 0.75f}; // Camera looking at point
+  camera.up = Vector3{0.0f, 0.0f, 1.0f}; // Camera up vector (rotation towards target)
   camera.fovy = 60.0f; // Camera field-of-view Y
   camera.type = CAMERA_PERSPECTIVE; // Camera mode type
 

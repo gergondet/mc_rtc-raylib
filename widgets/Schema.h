@@ -1,9 +1,13 @@
 #pragma once
 
+#include "../win32_defs.h"
+
 #include "Widget.h"
 
 #include <boost/filesystem.hpp>
 namespace bfs = boost::filesystem;
+
+#include <optional>
 
 struct SchemaForm;
 

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../win32_defs.h"
+
 #include "details/TransformBase.h"
 
 struct Point3D : public TransformBase<ControlAxis::TRANSLATION>

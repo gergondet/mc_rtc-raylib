@@ -1,5 +1,7 @@
 #pragma once
 
+#include "win32_defs.h"
+
 #include <SpaceVecAlg/Conversions.h>
 #include <SpaceVecAlg/SpaceVecAlg>
 

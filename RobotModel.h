@@ -1,5 +1,7 @@
 #pragma once
 
+#include "win32_defs.h"
+
 #include <mc_rbdyn/Robot.h>
 
 #include "raylib.h"

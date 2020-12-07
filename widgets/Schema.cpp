@@ -9,10 +9,14 @@ namespace details
 
 bfs::path current_path()
 {
+#ifndef __EMSCRIPTEN__
+  return bfs::current_path();
+#else
   auto cwd = get_current_dir_name();
   bfs::path out(cwd);
   free(cwd);
   return out;
+#endif
 }
 
 bfs::path canonical(const bfs::path & p)

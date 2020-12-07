@@ -1,9 +1,12 @@
 #pragma once
 
+#include "win32_defs.h"
+
 #include <mc_control/ControllerClient.h>
 #include <mc_control/ControllerServer.h>
 
 #include <mc_rbdyn/Robots.h>
+#include <RBDyn/Joint.h>
 
 #include "InteractiveMarker.h"
 #include "LogSink.h"

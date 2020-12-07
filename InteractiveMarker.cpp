@@ -2,6 +2,10 @@
 
 #include "utils.h"
 
+#ifndef M_PI
+#  define M_PI 3.14159265358979323846264338327950288
+#endif
+
 InteractiveMarker::MarkerPositionControl::MarkerPositionControl(Color color, Eigen::Vector3d offset)
 : color(color), offset(offset)
 {
