@@ -129,7 +129,7 @@ set(SUPPORT_FILEFORMAT_JPG ON CACHE BOOL "" FORCE) # Support for loading jpg fil
 if(EMSCRIPTEN)
   set(PLATFORM "Web" CACHE STRING "" FORCE)
 endif()
-add_subdirectory(raylib)
+add_subdirectory(raylib EXCLUDE_FROM_ALL)
 if(EMSCRIPTEN)
   target_compile_options(raylib_static PUBLIC "-matomics" -s USE_PTHREADS=1)
 endif()
@@ -179,26 +179,27 @@ set(main_SRC
 
 file(COPY raylib/src/external/glad.h DESTINATION "${PROJECT_BINARY_DIR}/include/glad/")
 
-add_executable(main ${main_SRC})
-target_compile_definitions(main PUBLIC R3D_ASSIMP_SUPPORT)
-target_link_libraries(main PUBLIC raylib ${ASSIMP_LIBRARIES})
+add_executable(${PROJECT_NAME} ${main_SRC})
+target_compile_definitions(${PROJECT_NAME} PUBLIC R3D_ASSIMP_SUPPORT)
+target_link_libraries(${PROJECT_NAME} PUBLIC raylib ${ASSIMP_LIBRARIES})
 if(EMSCRIPTEN)
-  set_target_properties(main PROPERTIES OUTPUT_NAME index)
-  set_target_properties(main PROPERTIES COMPILE_FLAGS "-matomics -s USE_PTHREADS=1 -s DISABLE_EXCEPTION_CATCHING=0")
-  target_link_libraries(main PUBLIC "-s USE_GLFW=3")
-  target_link_libraries(main PUBLIC IrrXML "-s EXPORTED_RUNTIME_METHODS='[\"ccall\",\"cwrap\"]'" "--shell-file ${PROJECT_SOURCE_DIR}/index.html" "--preload-file assets" "-s USE_PTHREADS=1" "-s PTHREAD_POOL_SIZE=8" "-Wl,--error-limit=0" "-s DISABLE_EXCEPTION_CATCHING=0" "-s TOTAL_MEMORY=512MB" "-matomics" "-s USE_ZLIB=1" "-s ALLOW_MEMORY_GROWTH=1" "--source-map-base http://localhost:8000/" "-Wl,--whole-archive")
+  set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME index)
+  set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_FLAGS "-matomics -s USE_PTHREADS=1 -s DISABLE_EXCEPTION_CATCHING=0")
+  target_link_libraries(${PROJECT_NAME} PUBLIC "-s USE_GLFW=3")
+  target_link_libraries(${PROJECT_NAME} PUBLIC IrrXML "-s EXPORTED_RUNTIME_METHODS='[\"ccall\",\"cwrap\"]'" "--shell-file ${PROJECT_SOURCE_DIR}/index.html" "--preload-file assets" "-s USE_PTHREADS=1" "-s PTHREAD_POOL_SIZE=8" "-Wl,--error-limit=0" "-s DISABLE_EXCEPTION_CATCHING=0" "-s TOTAL_MEMORY=512MB" "-matomics" "-s USE_ZLIB=1" "-s ALLOW_MEMORY_GROWTH=1" "--source-map-base http://localhost:8000/" "-Wl,--whole-archive")
 else()
-  target_compile_definitions(main PUBLIC IMGUI_IMPL_OPENGL_LOADER_GLAD)
+  target_compile_definitions(${PROJECT_NAME} PUBLIC IMGUI_IMPL_OPENGL_LOADER_GLAD)
 endif()
-target_link_libraries(main PUBLIC mc_rtc::mc_control_fsm mc_rtc::mc_control_client Boost::program_options)
+target_link_libraries(${PROJECT_NAME} PUBLIC mc_rtc::mc_control_fsm mc_rtc::mc_control_client Boost::program_options)
 if(TARGET mc_rtc::mc_rtc_ros)
-  target_compile_definitions(main PUBLIC MC_RTC_HAS_ROS_SUPPORT)
-  target_link_libraries(main PUBLIC mc_rtc::mc_rtc_ros)
+  target_compile_definitions(${PROJECT_NAME} PUBLIC MC_RTC_HAS_ROS_SUPPORT)
+  target_link_libraries(${PROJECT_NAME} PUBLIC mc_rtc::mc_rtc_ros)
 endif()
-target_include_directories(main PUBLIC
+target_include_directories(${PROJECT_NAME} PUBLIC
   ${ASSIMP_INCLUDE_DIRS}
   "${PROJECT_SOURCE_DIR}/raylib-3D"
   "${PROJECT_SOURCE_DIR}/imgui"
   "${PROJECT_SOURCE_DIR}/imgui/backends"
   "${PROJECT_BINARY_DIR}/include/"
 )
+install(TARGETS ${PROJECT_NAME} DESTINATION bin)
