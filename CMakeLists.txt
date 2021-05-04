@@ -181,6 +181,7 @@ file(COPY raylib/src/external/glad.h DESTINATION "${PROJECT_BINARY_DIR}/include/
 
 add_executable(${PROJECT_NAME} ${main_SRC})
 target_compile_definitions(${PROJECT_NAME} PUBLIC R3D_ASSIMP_SUPPORT)
+target_link_directories(${PROJECT_NAME} PUBLIC ${ASSIMP_LIBRARY_DIRS})
 target_link_libraries(${PROJECT_NAME} PUBLIC raylib ${ASSIMP_LIBRARIES})
 if(EMSCRIPTEN)
   set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME index)
