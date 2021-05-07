@@ -142,9 +142,13 @@ set(imgui_SRC
   imgui/imgui_widgets.cpp
   imgui/backends/imgui_impl_opengl3.h
   imgui/backends/imgui_impl_opengl3.cpp
-  imgui_impl_raylib.cpp
-  imgui_impl_raylib.h
 )
+
+add_library(imgui STATIC ${imgui_SRC})
+target_include_directories(imgui PUBLIC "${PROJECT_SOURCE_DIR}/imgui" "${PROJECT_SOURCE_DIR}/imgui/backends" "${PROJECT_BINARY_DIR}/include")
+if(NOT EMSCRIPTEN)
+  target_compile_definitions(imgui PRIVATE IMGUI_IMPL_OPENGL_LOADER_GLAD GLAD_IMPLEMENTATION)
+endif()
 
 set(main_SRC
   main.cpp
@@ -174,7 +178,8 @@ set(main_SRC
   widgets/form/widgets.cpp
   widgets/Schema.cpp
   widgets/form/schema.cpp
-  ${imgui_SRC}
+  imgui_impl_raylib.cpp
+  imgui_impl_raylib.h
 )
 
 file(COPY raylib/src/external/glad.h DESTINATION "${PROJECT_BINARY_DIR}/include/glad/")
@@ -182,14 +187,12 @@ file(COPY raylib/src/external/glad.h DESTINATION "${PROJECT_BINARY_DIR}/include/
 add_executable(${PROJECT_NAME} ${main_SRC})
 target_compile_definitions(${PROJECT_NAME} PUBLIC R3D_ASSIMP_SUPPORT)
 target_link_directories(${PROJECT_NAME} PUBLIC ${ASSIMP_LIBRARY_DIRS})
-target_link_libraries(${PROJECT_NAME} PUBLIC raylib ${ASSIMP_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} PUBLIC raylib ${ASSIMP_LIBRARIES} imgui)
 if(EMSCRIPTEN)
   set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME index)
   set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_FLAGS "-matomics -s USE_PTHREADS=1 -s DISABLE_EXCEPTION_CATCHING=0")
   target_link_libraries(${PROJECT_NAME} PUBLIC "-s USE_GLFW=3")
   target_link_libraries(${PROJECT_NAME} PUBLIC IrrXML "-s EXPORTED_RUNTIME_METHODS='[\"ccall\",\"cwrap\"]'" "--shell-file ${PROJECT_SOURCE_DIR}/index.html" "--preload-file assets" "-s USE_PTHREADS=1" "-s PTHREAD_POOL_SIZE=8" "-Wl,--error-limit=0" "-s DISABLE_EXCEPTION_CATCHING=0" "-s TOTAL_MEMORY=512MB" "-matomics" "-s USE_ZLIB=1" "-s ALLOW_MEMORY_GROWTH=1" "--source-map-base http://localhost:8000/" "-Wl,--whole-archive")
-else()
-  target_compile_definitions(${PROJECT_NAME} PUBLIC IMGUI_IMPL_OPENGL_LOADER_GLAD)
 endif()
 target_link_libraries(${PROJECT_NAME} PUBLIC mc_rtc::mc_control_fsm mc_rtc::mc_control_client Boost::program_options)
 if(TARGET mc_rtc::mc_rtc_ros)
@@ -199,8 +202,5 @@ endif()
 target_include_directories(${PROJECT_NAME} PUBLIC
   ${ASSIMP_INCLUDE_DIRS}
   "${PROJECT_SOURCE_DIR}/raylib-3D"
-  "${PROJECT_SOURCE_DIR}/imgui"
-  "${PROJECT_SOURCE_DIR}/imgui/backends"
-  "${PROJECT_BINARY_DIR}/include/"
 )
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)
