@@ -147,7 +147,10 @@ set(imgui_SRC
 add_library(imgui STATIC ${imgui_SRC})
 target_include_directories(imgui PUBLIC "${PROJECT_SOURCE_DIR}/imgui" "${PROJECT_SOURCE_DIR}/imgui/backends" "${PROJECT_BINARY_DIR}/include")
 if(NOT EMSCRIPTEN)
-  target_compile_definitions(imgui PRIVATE IMGUI_IMPL_OPENGL_LOADER_GLAD GLAD_IMPLEMENTATION)
+  target_compile_definitions(imgui PRIVATE IMGUI_IMPL_OPENGL_LOADER_GLAD)
+  if(APPLE)
+    target_compile_definitions(imgui PRIVATE GLAD_IMPLEMENTATION)
+  endif()
 endif()
 
 set(main_SRC
