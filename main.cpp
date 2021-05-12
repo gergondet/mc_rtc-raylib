@@ -19,6 +19,11 @@
 #include "imgui_impl_opengl3.h"
 #include "imgui_impl_raylib.h"
 
+#ifdef __APPLE__
+#  include "glad/glad.h"
+#  include "raylib/src/external/glfw/include/GLFW/glfw3.h"
+#endif
+
 #ifdef __EMSCRIPTEN__
 #  include <emscripten/emscripten.h>
 #endif
@@ -584,6 +589,13 @@ int main(int argc, char * argv[])
   auto & bgColor = style.Colors[ImGuiCol_WindowBg];
   bgColor.w = 0.5f;
 
+#ifdef __APPLE__
+  if(!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+  {
+    mc_rtc::log::critical("GLAD: Cannot load OpenGL extensions");
+    return 1;
+  }
+#endif
   ImGui_ImplOpenGL3_Init();
   ImGui_ImplRaylib_Init();
 
