@@ -14,6 +14,9 @@
 #include "utils.h"
 
 #include "Robot_Regular_ttf.h"
+#ifndef __EMSCRIPTEN__
+#  include "icon.png.h"
+#endif
 
 #include "imgui.h"
 #include "imgui_impl_opengl3.h"
@@ -561,6 +564,9 @@ int main(int argc, char * argv[])
   SetConfigFlags(FLAG_WINDOW_RESIZABLE);
   SetTraceLogLevel(LOG_WARNING);
   InitWindow(screenWidth, screenHeight, "mc_rtc - raylib based 3D GUI");
+#ifndef __EMSCRIPTEN__
+  SetWindowIcon(LoadImageFromMemory("png", icon_png, icon_png_len));
+#endif
 
   // Define the camera to look into our 3d world
   OrbitCamera camera;
