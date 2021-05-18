@@ -2,8 +2,13 @@
 
 #include <mc_rbdyn/RobotLoader.h>
 
-Robot::Robot(Client & client, const ElementId & id, const std::vector<std::string> & p) : Widget(client, id)
+Robot::Robot(Client & client, const ElementId & id) : Widget(client, id)
 {
+}
+
+void Robot::reset(const std::vector<std::string> & p)
+{
+  params_ = p;
   mc_rbdyn::RobotModulePtr rm{nullptr};
   if(p.size() == 1)
   {
@@ -30,8 +35,12 @@ Robot::Robot(Client & client, const ElementId & id, const std::vector<std::strin
   model_ = std::make_unique<RobotModel>(robots_->robot());
 }
 
-void Robot::data(const std::vector<std::vector<double>> & q, const sva::PTransformd & posW)
+void Robot::data(const std::vector<std::string> & params, const std::vector<std::vector<double>> & q, const sva::PTransformd & posW)
 {
+  if(params != params_)
+  {
+    reset(params);
+  }
   if(robots_)
   {
     robots_->robot().mbc().q = q;

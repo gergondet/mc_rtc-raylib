@@ -338,7 +338,7 @@ void Client::robot(const ElementId & id,
                    const std::vector<std::vector<double>> & q,
                    const sva::PTransformd & posW)
 {
-  widget<Robot>(id, params).data(q, posW);
+  widget<Robot>(id).data(params, q, posW);
 }
 
 void Client::schema(const ElementId & id, const std::string & schema)
