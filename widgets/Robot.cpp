@@ -44,9 +44,10 @@ void Robot::data(const std::vector<std::string> & params, const std::vector<std:
   }
   if(robots_)
   {
-    robots_->robot().mbc().q = q;
-    robots_->robot().forwardKinematics();
-    robots_->robot().posW(posW);
+    auto & robot = robots_->robot();
+    robot.q()->value(rbd::paramToVector(robot.mb(), q));
+    robot.forwardKinematics();
+    robot.posW(posW);
   }
   if(display_ && model_)
   {
