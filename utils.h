@@ -51,6 +51,9 @@ void DrawCylinderEx(Vector3 position,
                     int sides,
                     Color color);
 
+// Draw a 3D line with the given thickness and/or dotted
+void DrawLine3DEx(Vector3 start, Vector3 end, Color color, float thick, bool dotted);
+
 // Generate a cylinder mesh that is compatible with ROS URDF convention
 // - Shaft in the z-direction
 // - Origin at the cylinder center

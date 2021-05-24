@@ -238,7 +238,7 @@ void StartTicker()
       data.iter = 0;
       data.gc = std::move(gc_ptr);
       data.start_t = std::chrono::system_clock::now();
-      client_ptr->connect(gc.server(), *gc.controller().gui());
+      client_ptr->connect(gc.server(), gc.controller().gui());
       fps = static_cast<int>(1 / gc.timestep());
       mc_rtc::log::info("Target background fps: {}", fps);
 #ifdef __EMSCRIPTEN__

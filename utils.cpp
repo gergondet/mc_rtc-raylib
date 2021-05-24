@@ -3,6 +3,8 @@
 #include "raylib.h"
 #include "rlgl.h"
 
+#include <GL/glew.h>
+
 #define PAR_MALLOC(T, N) ((T *)RL_MALLOC(N * sizeof(T)))
 #define PAR_CALLOC(T, N) ((T *)RL_CALLOC(N * sizeof(T), 1))
 #define PAR_REALLOC(T, BUF, N) ((T *)RL_REALLOC(BUF, sizeof(T) * (N)))
@@ -165,6 +167,29 @@ void DrawCylinderEx(Vector3 position,
     rlEnd();
   }
   rlPopMatrix();
+}
+
+void DrawLine3DEx(Vector3 start, Vector3 end, Color color, float thick, bool dotted)
+{
+  //if(dotted)
+  //{
+  //  glPushAttrib(GL_ENABLE_BIT);
+  //  glLineStipple(1, 0xAAAA);
+  //  glEnable(GL_LINE_STIPPLE);
+  //}
+  glLineWidth(100);
+  rlColor4ub(color.r, color.g, color.b, color.a);
+  rlBegin(RL_LINES);
+  {
+    rlVertex3f(start.x, start.y, start.z);
+    rlVertex3f(end.x, end.y, end.z);
+  }
+  rlEnd();
+  glLineWidth(1);
+  //if(dotted)
+  //{
+  //  glPopAttrib();
+  //}
 }
 
 void DrawArrow(Vector3 p0, Vector3 p1, float shaft_diam, float head_diam, float head_len, Color color)

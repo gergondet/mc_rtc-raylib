@@ -108,7 +108,14 @@ private:
 
   void polygon(const ElementId & id,
                const std::vector<std::vector<Eigen::Vector3d>> & points,
-               const mc_rtc::gui::Color & color) override;
+               const mc_rtc::gui::LineConfig & config);
+
+  inline void polygon(const ElementId & id,
+               const std::vector<std::vector<Eigen::Vector3d>> & points,
+               const mc_rtc::gui::Color & color) override
+  {
+    polygon(id, points, mc_rtc::gui::LineConfig(color));
+  }
 
   void force(const ElementId & id,
              const ElementId & requestId,

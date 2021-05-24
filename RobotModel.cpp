@@ -410,7 +410,7 @@ RobotModel::RobotModel(const mc_rbdyn::Robot & robot, bool useCollisionModel)
 
 void RobotModel::update(const mc_rbdyn::Robot & robot)
 {
-  const auto & poses = robot.bodyPosW();
+  const auto & poses = robot.mbc().bodyPosW;
   for(size_t i = 0; i < poses.size(); ++i)
   {
     bodies_[i].update(poses[i]);

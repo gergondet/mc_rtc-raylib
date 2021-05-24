@@ -219,9 +219,9 @@ void Client::trajectory(const ElementId & id, const sva::PTransformd & point, co
 
 void Client::polygon(const ElementId & id,
                      const std::vector<std::vector<Eigen::Vector3d>> & points,
-                     const mc_rtc::gui::Color & color)
+                     const mc_rtc::gui::LineConfig & config)
 {
-  widget<Polygon>(id).data(points, color);
+  widget<Polygon>(id).data(points, config);
 }
 
 void Client::force(const ElementId & id,
@@ -338,7 +338,10 @@ void Client::robot(const ElementId & id,
                    const std::vector<std::vector<double>> & q,
                    const sva::PTransformd & posW)
 {
-  widget<Robot>(id).data(params, q, posW);
+  if(id.category.back() != "Real")
+  {
+    widget<Robot>(id).data(params, q, posW);
+  }
 }
 
 void Client::schema(const ElementId & id, const std::string & schema)

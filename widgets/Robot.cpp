@@ -31,7 +31,8 @@ void Robot::reset(const std::vector<std::string> & p)
     mc_rtc::log::error("RobotWidget {} cannot be displayed as the RobotModule cannot be loaded", id.name);
     return;
   }
-  robots_ = mc_rbdyn::loadRobot(*rm);
+  robots_ = std::make_shared<mc_rbdyn::Robots>();
+  robots_->load(*rm, rm->name);
   model_ = std::make_unique<RobotModel>(robots_->robot());
 }
 
