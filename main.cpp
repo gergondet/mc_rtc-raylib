@@ -194,12 +194,22 @@ void StartTicker()
         auto & robot = gc.robot();
         for(unsigned i = 0; i < robot.refJointOrder().size(); i++)
         {
+#if MC_RTC_VERSION_MAJOR < 2
           auto jIdx = robot.jointIndexInMBC(i);
+#else
+          auto jIdx = robot.refJointIndexToQIndex(i);
+          auto alphaIdx = robot.refJointIndexToQDotIndex(i);
+#endif
           if(jIdx != -1)
           {
             auto jointIndex = static_cast<unsigned>(jIdx);
+#if MC_RTC_VERSION_MAJOR < 2
             qEnc[i] = robot.mbc().q[jointIndex][0];
             alphaEnc[i] = robot.mbc().alpha[jointIndex][0];
+#else
+            qEnc[i] = robot.q()->value()(jIdx);
+            alphaEnc[i] = robot.alpha()->value()(alphaIdx);
+#endif
           }
         }
         gc.setEncoderValues(qEnc);
@@ -238,7 +248,12 @@ void StartTicker()
       data.iter = 0;
       data.gc = std::move(gc_ptr);
       data.start_t = std::chrono::system_clock::now();
-      client_ptr->connect(gc.server(), *gc.controller().gui());
+#if MC_RTC_VERSION_MAJOR < 2
+      auto & gui = *gc.controller().gui();
+#else
+      auto & gui = gc.controller().gui();
+#endif
+      client_ptr->connect(gc.server(), gui);
       fps = static_cast<int>(1 / gc.timestep());
       mc_rtc::log::info("Target background fps: {}", fps);
 #ifdef __EMSCRIPTEN__

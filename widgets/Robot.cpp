@@ -2,6 +2,8 @@
 
 #include <mc_rbdyn/RobotLoader.h>
 
+#include <mc_rtc/version.h>
+
 Robot::Robot(Client & client, const ElementId & id) : Widget(client, id)
 {
 }
@@ -43,9 +45,13 @@ void Robot::data(const std::vector<std::string> & params, const std::vector<std:
   }
   if(robots_)
   {
-    robots_->robot().mbc().q = q;
-    robots_->robot().forwardKinematics();
-    robots_->robot().posW(posW);
+    auto & robot = robots_->robot();
+#if MC_RTC_VERSION_MAJOR < 2
+    robot.mbc().q = q;
+#else
+    robot.q()->set(rbd::paramToVector(robot.mb(), q));
+#endif
+    robot.posW(posW);
   }
   if(display_ && model_)
   {
